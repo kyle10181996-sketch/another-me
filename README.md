@@ -1,66 +1,107 @@
 # 世另我 / AnotherMe
 
-本项目是“世另我”的本地 MVP 原型：一个长期学习用户经历、决策、动机和结果的个人镜像 Agent。
+世另我是一个本地优先的个人镜像 Agent。它会记录你的经历、选择、动机和结果，并在你面对重要决策时，基于已有记忆模拟不同选择可能带来的未来分支。
 
-第一版聚焦一个核心场景：
-
-> 重大决策前，问问另一个我。
+它不是算命工具，也不会替你做决定。它的作用是帮你看清：过去的你通常如何选择、你真正纠结的是什么、哪些盲区反复出现，以及下一步可以做什么小行动来验证判断。
 
 ## 功能
 
-- 每日记录：保存原文并提取结构化记忆
-- 我的镜像：查看价值观、行为模式、恐惧、愿望、盲区等记忆卡片
+- 每日记录：保存日常经历，并提取结构化记忆
+- 我的镜像：查看价值观、行为模式、恐惧、愿望、目标和盲区
 - 决策模拟：输入 A/B 选项，生成 1 年、3 年、10 年未来分支
 - 未来来信：基于已有记忆生成来自未来自己的信
-- 安全边界：心理危机、医疗、法律、投资等场景进入谨慎辅助模式
+- 时间线：按时间查看记录、选择和复盘线索
+- 本地数据：记录、记忆和模型配置都保存在本机
+- 多模型配置：支持 OpenAI 兼容接口，可接入 OpenAI、DeepSeek、Qwen、Kimi 等服务
+
+## 使用桌面版
+
+Windows 用户可以下载 GitHub Actions 生成的安装包或便携版。
+
+1. 打开仓库的 Actions 页面
+2. 进入最新的 `Build Desktop App` 构建
+3. 在页面底部下载 `another-me-windows`
+4. 解压后运行安装版或便携版
+
+安装版文件名类似：
+
+```text
+世另我 Setup 0.1.0.exe
+```
+
+便携版文件名类似：
+
+```text
+世另我 0.1.0.exe
+```
+
+第一次打开应用后，进入“API 设置”，填写模型服务配置即可使用。
+
+## 模型配置
+
+世另我使用 OpenAI 兼容的 `/chat/completions` 接口。只要服务商提供兼容接口，就可以通过以下三项接入：
+
+```text
+Base URL
+API Key
+模型名
+```
+
+常用配置示例：
+
+| 服务商 | Base URL | 模型示例 |
+| --- | --- | --- |
+| OpenAI | `https://api.openai.com/v1` | `gpt-4.1-mini` |
+| DeepSeek | `https://api.deepseek.com/v1` | `deepseek-chat` |
+| Qwen | `https://dashscope.aliyuncs.com/compatible-mode/v1` | `qwen-plus` |
+| Kimi | `https://api.moonshot.cn/v1` | `moonshot-v1-8k` |
+
+API Key 只保存在本机，不会写入仓库，也不会上传到 GitHub。
 
 ## 本地运行
+
+需要先安装 Node.js。
 
 ```bash
 npm install
 npm run dev
 ```
 
-打开 `http://localhost:3000`。
+启动后打开：
 
-首次使用时进入“API 设置”，输入自己的 AI 服务配置。支持 OpenAI 兼容接口，只要服务商提供 `Base URL + API Key + 模型名` 即可接入。
+```text
+http://localhost:3000
+```
 
-常用示例：
+## 本地数据
 
-- OpenAI：`https://api.openai.com/v1`，模型如 `gpt-4.1-mini`
-- DeepSeek：`https://api.deepseek.com/v1`，模型如 `deepseek-chat`
-- Qwen：`https://dashscope.aliyuncs.com/compatible-mode/v1`，模型如 `qwen-plus`
-- Kimi：`https://api.moonshot.cn/v1`，模型如 `moonshot-v1-8k`
+Web 本地开发时，数据保存在项目目录：
 
-配置只会保存到本机：
+```text
+data/another-me-state.json
+data/settings.json
+```
 
-- Web 本地开发：`data/settings.json`
-- 桌面应用：系统用户数据目录下的 `data/settings.json`
+桌面应用中，数据保存在系统用户数据目录下的 `data/` 文件夹。
 
-这些本地数据文件已被 `.gitignore` 排除，不会上传到 GitHub。
+这些文件已被 `.gitignore` 排除，不会进入 GitHub 仓库。
 
-## 桌面版打包
+## 打包 Windows 应用
 
 ```bash
 npm run dist:win
 ```
 
-这会尝试生成 Windows x64 安装器和便携版 `.exe`，输出到 `release/`。
+构建完成后，安装包会输出到：
 
-如果在 macOS 上交叉构建 Windows 包时 Electron 下载或 NSIS 环境失败，可以直接推送到 GitHub 后，在 GitHub Actions 的 `Build Desktop App` workflow 里生成 Windows 安装包。
+```text
+release/
+```
 
-## 当前实现说明
+仓库也包含 GitHub Actions workflow。推送到 `main` 分支后，会自动在 Windows 环境构建 `.exe` 并上传为 artifact。
 
-- 数据保存到项目本地文件 `data/another-me-state.json`
-- API Key 保存到项目本地文件 `data/settings.json`
-- 如果浏览器里存在旧版 `localStorage` 数据，首次打开时会自动迁移到本地文件
-- AI 管线为本地确定性模拟，`src/lib/ai/llm.ts` 和 `src/lib/ai/embedding.ts` 已预留真实 API 适配层
-- Prompt 集中在 `src/lib/ai/prompts.ts`
-- 用户记忆类型和核心数据结构在 `src/lib/types.ts`
+## 安全边界
 
-## 后续建议
+世另我不会给出医疗诊断、法律结论、投资买卖建议，也不会处理心理危机时继续做未来模拟。
 
-- 将本地状态迁移到 Supabase/PostgreSQL
-- 接入 pgvector 做相似决策检索
-- 将 `llm.ts` 替换为 OpenAI Responses API 结构化输出
-- 增加记忆编辑、导出和长期记忆开关
+遇到自伤、自杀或强烈绝望等内容时，应用会转为安全支持模式，提醒用户联系身边可信任的人或当地紧急服务。
