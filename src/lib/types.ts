@@ -104,6 +104,7 @@ export type AppState = {
 
 export type LocalSettings = {
   apiKey?: string;
+  baseUrl: string;
   model: string;
   updatedAt?: string;
 };
@@ -111,6 +112,7 @@ export type LocalSettings = {
 export type PublicSettings = {
   hasApiKey: boolean;
   maskedApiKey?: string;
+  baseUrl: string;
   model: string;
   updatedAt?: string;
 };

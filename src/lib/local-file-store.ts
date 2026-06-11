@@ -41,12 +41,13 @@ export async function writeLocalState(state: AppState): Promise<void> {
 
 function normalizeSettings(value: unknown): LocalSettings {
   if (!value || typeof value !== "object") {
-    return { model: "gpt-4.1-mini" };
+    return { baseUrl: "https://api.openai.com/v1", model: "gpt-4.1-mini" };
   }
 
   const settings = value as Partial<LocalSettings>;
   return {
     apiKey: typeof settings.apiKey === "string" && settings.apiKey.trim() ? settings.apiKey.trim() : undefined,
+    baseUrl: typeof settings.baseUrl === "string" && settings.baseUrl.trim() ? settings.baseUrl.trim().replace(/\/+$/, "") : "https://api.openai.com/v1",
     model: typeof settings.model === "string" && settings.model.trim() ? settings.model.trim() : "gpt-4.1-mini",
     updatedAt: typeof settings.updatedAt === "string" ? settings.updatedAt : undefined,
   };
@@ -61,6 +62,7 @@ export function toPublicSettings(settings: LocalSettings): PublicSettings {
   return {
     hasApiKey: Boolean(settings.apiKey),
     maskedApiKey: settings.apiKey ? maskApiKey(settings.apiKey) : undefined,
+    baseUrl: settings.baseUrl,
     model: settings.model,
     updatedAt: settings.updatedAt,
   };
@@ -72,7 +74,7 @@ export async function readLocalSettings(): Promise<LocalSettings> {
     return normalizeSettings(JSON.parse(raw));
   } catch (error) {
     if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") {
-      return { model: "gpt-4.1-mini" };
+      return { baseUrl: "https://api.openai.com/v1", model: "gpt-4.1-mini" };
     }
 
     throw error;

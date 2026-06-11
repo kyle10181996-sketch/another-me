@@ -50,7 +50,7 @@ function GhostButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
 
 export function AppShell() {
   const [state, setState] = useState<AppState>(initialState);
-  const [settings, setSettings] = useState<PublicSettings>({ hasApiKey: false, model: "gpt-4.1-mini" });
+  const [settings, setSettings] = useState<PublicSettings>({ hasApiKey: false, baseUrl: "https://api.openai.com/v1", model: "gpt-4.1-mini" });
   const [hydrated, setHydrated] = useState(false);
   const [busy, setBusy] = useState(false);
   const [view, setView] = useState<View>("daily");
@@ -177,14 +177,14 @@ export function AppShell() {
     setBusy(false);
   }
 
-  async function saveSettings(apiKey: string, model: string) {
+  async function saveSettings(apiKey: string, baseUrl: string, model: string) {
     setBusy(true);
     const response = await fetch("/api/settings", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ apiKey, model }),
+      body: JSON.stringify({ apiKey, baseUrl, model }),
     });
     const savedSettings = await response.json() as PublicSettings;
     setSettings(savedSettings);
@@ -528,10 +528,17 @@ function SettingsPanel({
 }: {
   busy: boolean;
   settings: PublicSettings;
-  onSubmit: (apiKey: string, model: string) => Promise<void>;
+  onSubmit: (apiKey: string, baseUrl: string, model: string) => Promise<void>;
 }) {
   const [apiKey, setApiKey] = useState("");
+  const [baseUrl, setBaseUrl] = useState(settings.baseUrl);
   const [model, setModel] = useState(settings.model);
+  const presets = [
+    { label: "OpenAI", baseUrl: "https://api.openai.com/v1", model: "gpt-4.1-mini" },
+    { label: "DeepSeek", baseUrl: "https://api.deepseek.com/v1", model: "deepseek-chat" },
+    { label: "Qwen", baseUrl: "https://dashscope.aliyuncs.com/compatible-mode/v1", model: "qwen-plus" },
+    { label: "Kimi", baseUrl: "https://api.moonshot.cn/v1", model: "moonshot-v1-8k" },
+  ];
 
   return (
     <section>
@@ -539,12 +546,31 @@ function SettingsPanel({
         <KeyRound className="text-[var(--accent)]" />
         <div>
           <h2 className="text-2xl font-semibold">API 设置</h2>
-          <p className="text-sm text-[var(--muted)]">API Key 只保存在本机 `data/settings.json`，不会上传到 GitHub。</p>
+          <p className="text-sm text-[var(--muted)]">支持 OpenAI 兼容接口。Base URL、模型名和 API Key 只保存在本机，不会上传到 GitHub。</p>
         </div>
+      </div>
+      <div className="mb-3 flex flex-wrap gap-2">
+        {presets.map((preset) => (
+          <GhostButton key={preset.label} onClick={() => {
+            setBaseUrl(preset.baseUrl);
+            setModel(preset.model);
+          }}>
+            {preset.label}
+          </GhostButton>
+        ))}
       </div>
       <div className="grid gap-3">
         <label className="grid gap-2 text-sm font-semibold">
-          OpenAI API Key
+          Base URL
+          <input
+            value={baseUrl}
+            onChange={(event) => setBaseUrl(event.target.value)}
+            className="min-h-11 px-3"
+            placeholder="https://api.openai.com/v1"
+          />
+        </label>
+        <label className="grid gap-2 text-sm font-semibold">
+          API Key
           <input
             value={apiKey}
             onChange={(event) => setApiKey(event.target.value)}
@@ -555,18 +581,21 @@ function SettingsPanel({
         </label>
         <label className="grid gap-2 text-sm font-semibold">
           模型
-          <input value={model} onChange={(event) => setModel(event.target.value)} className="min-h-11 px-3" placeholder="gpt-4.1-mini" />
+          <input value={model} onChange={(event) => setModel(event.target.value)} className="min-h-11 px-3" placeholder="deepseek-chat / qwen-plus / moonshot-v1-8k" />
         </label>
       </div>
       <div className="mt-4 flex flex-wrap items-center gap-3">
-        <PrimaryButton disabled={busy || !model.trim()} onClick={() => void onSubmit(apiKey, model)}>
+        <PrimaryButton disabled={busy || !baseUrl.trim() || !model.trim()} onClick={() => void onSubmit(apiKey, baseUrl, model)}>
           <KeyRound size={17} />
           保存本地设置
         </PrimaryButton>
         <span className="text-sm text-[var(--muted)]">
-          {settings.hasApiKey ? `已配置：${settings.maskedApiKey}` : "尚未配置 API Key，当前会使用本地模拟。"}
+          {settings.hasApiKey ? `已配置：${settings.maskedApiKey} · ${settings.model}` : "尚未配置 API Key，当前会使用本地模拟。"}
         </span>
       </div>
+      <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
+        示例：DeepSeek 使用 `https://api.deepseek.com/v1`，Qwen 使用 `https://dashscope.aliyuncs.com/compatible-mode/v1`，Kimi 使用 `https://api.moonshot.cn/v1`。
+      </p>
     </section>
   );
 }

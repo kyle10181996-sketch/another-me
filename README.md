@@ -23,7 +23,16 @@ npm run dev
 
 打开 `http://localhost:3000`。
 
-首次使用时进入“API 设置”，输入自己的 OpenAI API Key。Key 只会保存到本机：
+首次使用时进入“API 设置”，输入自己的 AI 服务配置。支持 OpenAI 兼容接口，只要服务商提供 `Base URL + API Key + 模型名` 即可接入。
+
+常用示例：
+
+- OpenAI：`https://api.openai.com/v1`，模型如 `gpt-4.1-mini`
+- DeepSeek：`https://api.deepseek.com/v1`，模型如 `deepseek-chat`
+- Qwen：`https://dashscope.aliyuncs.com/compatible-mode/v1`，模型如 `qwen-plus`
+- Kimi：`https://api.moonshot.cn/v1`，模型如 `moonshot-v1-8k`
+
+配置只会保存到本机：
 
 - Web 本地开发：`data/settings.json`
 - 桌面应用：系统用户数据目录下的 `data/settings.json`
