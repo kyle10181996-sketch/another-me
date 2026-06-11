@@ -76,7 +76,7 @@ async function createWindow() {
       height: 820,
       minWidth: 980,
       minHeight: 680,
-      title: "世另我",
+      title: "AnotherMe",
       webPreferences: {
         contextIsolation: true,
         nodeIntegration: false,
@@ -85,7 +85,7 @@ async function createWindow() {
 
     await mainWindow.loadURL(url);
   } catch (error) {
-    dialog.showErrorBox("世另我启动失败", error instanceof Error ? error.message : String(error));
+    dialog.showErrorBox("AnotherMe failed to start", error instanceof Error ? error.message : String(error));
     app.quit();
   }
 }

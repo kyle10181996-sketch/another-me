@@ -1,7 +1,7 @@
-const crisisTerms = ["自杀", "不想活", "结束生命", "自残", "活不下去"];
-const medicalTerms = ["诊断", "药", "症状", "医院", "病", "治疗"];
-const legalTerms = ["起诉", "律师", "合同纠纷", "违法", "法律"];
-const financeTerms = ["买入", "卖出", "股票", "币", "借贷", "贷款", "投资"];
+const crisisTerms = ["suicide", "kill myself", "self-harm", "self harm", "end my life", "can't go on", "自杀", "不想活", "结束生命", "自残", "活不下去"];
+const medicalTerms = ["diagnosis", "medicine", "symptom", "hospital", "doctor", "treatment", "诊断", "药", "症状", "医院", "病", "治疗"];
+const legalTerms = ["lawsuit", "lawyer", "legal", "contract dispute", "illegal", "sue", "起诉", "律师", "合同纠纷", "违法", "法律"];
+const financeTerms = ["buy", "sell", "stock", "crypto", "loan", "debt", "investment", "买入", "卖出", "股票", "币", "借贷", "贷款", "投资"];
 
 export type RiskType = "crisis" | "medical" | "legal" | "finance" | "none";
 
@@ -19,19 +19,19 @@ export function classifyRisk(text: string): RiskType {
 
 export function getSafetyResponse(type: RiskType) {
   if (type === "crisis") {
-    return "我很在意你现在的安全。这个问题不适合只由 AI 陪你处理。请立刻联系身边可信任的人，或联系当地紧急服务/心理危机热线。";
+    return "I care about your immediate safety. This is not something an AI should handle alone. Please contact someone you trust right now, or contact local emergency services or a crisis hotline.";
   }
 
   if (type === "medical") {
-    return "这涉及医疗风险，我不能做诊断。可以帮你整理症状、时间线和想问医生的问题，并建议尽快咨询专业医生。";
+    return "This involves medical risk, so I cannot diagnose. I can help organize symptoms, timelines, and questions for a clinician, and suggest speaking with a qualified medical professional.";
   }
 
   if (type === "legal") {
-    return "这涉及法律风险，我不能冒充律师给确定性结论。可以帮你整理事实、潜在风险和咨询律师前的问题清单。";
+    return "This involves legal risk, so I cannot act as a lawyer or give a definitive legal conclusion. I can help organize facts, possible risks, and questions for a qualified lawyer.";
   }
 
   if (type === "finance") {
-    return "这涉及重大财务或投资风险，我不能给买入、卖出或收益承诺。可以帮你分析风险承受能力、最坏情况和决策盲区。";
+    return "This involves financial or investment risk, so I cannot tell you to buy or sell anything or promise returns. I can help analyze risk tolerance, downside scenarios, and decision blind spots.";
   }
 
   return null;

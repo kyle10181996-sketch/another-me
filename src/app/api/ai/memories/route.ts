@@ -30,8 +30,8 @@ export async function POST(request: Request) {
 
   try {
     const result = await generateJson<{ memories: MemoryDraft[] }>({
-      instructions: "你是世另我的记忆提取模块。只输出 JSON，不要输出 Markdown。不要夸大，不要把一次性事件过度总结成永久性人格。如果证据不足，confidence 不要超过 0.6。",
-      input: `从这段用户记录中提取 2 到 6 条长期记忆。每条必须包含 type,title,content,confidence,importance,visibility。\n允许的 type: ${allowedTypes.join(", ")}。\n用户文本：${text}`,
+      instructions: "You are AnotherMe's memory extraction module. Output JSON only. Do not use Markdown. Do not exaggerate or turn one-off events into permanent personality claims. If evidence is weak, confidence must not exceed 0.6.",
+      input: `Extract 2 to 6 long-term memories from this user log. Each memory must include type,title,content,confidence,importance,visibility.\nAllowed types: ${allowedTypes.join(", ")}.\nUser text: ${text}`,
     });
     const now = new Date().toISOString();
     const memories = (result.memories ?? [])
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
         id: `mem_${crypto.randomUUID()}`,
         userId,
         type: memory.type,
-        title: memory.title || "新的记忆",
+        title: memory.title || "New memory",
         content: memory.content,
         evidenceIds: [sourceId],
         confidence: Math.min(0.95, Math.max(0.1, Number(memory.confidence) || 0.55)),

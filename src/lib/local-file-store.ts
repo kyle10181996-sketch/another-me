@@ -54,7 +54,7 @@ function normalizeSettings(value: unknown): LocalSettings {
 }
 
 function maskApiKey(apiKey: string) {
-  if (apiKey.length <= 12) return "已保存";
+  if (apiKey.length <= 12) return "Saved";
   return `${apiKey.slice(0, 7)}...${apiKey.slice(-4)}`;
 }
 

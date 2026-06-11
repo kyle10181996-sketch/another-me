@@ -9,13 +9,13 @@ export function generateProfile(memories: Memory[], userId: string): Personality
 
   return {
     userId,
-    riskPreference: fears > desires ? "倾向于先识别风险，再决定是否推进。" : "容易被新机会点亮，但需要边界感来保持推进质量。",
-    decisionStyle: "适合用小步试错替代一次性 all in，并在关键节点做短复盘。",
-    motivationPattern: "当一个想法能连接长期意义和真实自我表达时，动力更容易出现。",
-    stressPattern: "当不确定性持续太久，决策质量可能下降，需要把问题拆小。",
+    riskPreference: fears > desires ? "You tend to identify risks before deciding whether to move forward." : "You can be energized by new opportunities, but you need clear boundaries to keep momentum healthy.",
+    decisionStyle: "You seem better suited to small experiments than all-in commitments, with short reviews at key checkpoints.",
+    motivationPattern: "Motivation appears when an idea connects long-term meaning with honest self-expression.",
+    stressPattern: "When uncertainty lasts too long, decision quality may drop; breaking the problem down helps.",
     longTermValues: values.slice(0, 4),
     recurringBlindSpots: blindSpots.slice(0, 4),
-    strengths: ["对自我动机敏感", "愿意复盘选择", "能从想法中看到长期可能性"],
+    strengths: ["Sensitive to inner motives", "Willing to review choices", "Able to see long-term possibility in ideas"],
     lastGeneratedAt: new Date().toISOString(),
   };
 }

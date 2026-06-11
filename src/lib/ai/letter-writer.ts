@@ -1,10 +1,10 @@
 import type { Memory } from "@/lib/types";
 
 const horizonLabels = {
-  "1": "一年后",
-  "3": "三年后",
-  "10": "十年后",
-  "20": "二十年后",
+  "1": "one year from now",
+  "3": "three years from now",
+  "10": "ten years from now",
+  "20": "twenty years from now",
 } as const;
 
 export type LetterHorizon = keyof typeof horizonLabels;
@@ -18,18 +18,18 @@ export function writeFutureLetter(question: string, horizon: LetterHorizon, memo
 
   const evidenceText = evidence.length > 0
     ? evidence.map((memory) => `- ${memory.content}`).join("\n")
-    : "- 目前记忆还很少，所以这封信会保持克制，只基于你刚刚提出的问题。";
+    : "- There are not many memories yet, so this letter stays modest and is based mainly on the question you just asked.";
 
-  return `来自${label}的我：
+  return `From me, ${label}:
 
-我记得你现在问的是：“${question || "我接下来该怎么走？"}”
+I remember that you are asking: "${question || "Where should I go next?"}"
 
-如果只给你一句话，我想说：不要急着把今天的纠结变成一个宏大的承诺。你真正需要的是一个能被现实检验的小动作。
+If I could give you one sentence, it would be this: do not rush to turn today's uncertainty into a grand commitment. What you need is a small action that reality can test.
 
-我这样说，是因为这些记忆反复提醒我：
+I say this because these memories keep pointing in the same direction:
 ${evidenceText}
 
-从${label}回头看，真正改变你的不是某次灵光一现，而是你有没有在兴奋之后给它边界，在焦虑出现时继续诚实记录，在结果出来后不逃开复盘。
+Looking back from ${label}, what changed you was not a single spark of inspiration. It was whether you gave excitement a boundary, kept recording honestly when anxiety appeared, and stayed long enough to review the outcome.
 
-今天先做一件小事：写下这个问题背后最害怕失去的东西，以及最想靠近的东西。然后只选一个 30 分钟内能完成的验证动作。`;
+Do one small thing today: write down what you are most afraid of losing, and what you most want to move toward. Then choose one validation action you can finish in 30 minutes.`;
 }

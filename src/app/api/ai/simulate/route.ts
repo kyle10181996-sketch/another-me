@@ -18,8 +18,8 @@ export async function POST(request: Request) {
 
   try {
     const result = await generateJson<SimulationResult>({
-      instructions: "你是“世另我”的决策模拟模块。不要预测命运，不替用户做决定。必须区分事实、推测和建议。只输出符合 TypeScript SimulationResult 结构的 JSON。",
-      input: `请基于当前决策和相关记忆，生成可解释的 A/B 未来分支模拟。字段必须包含 id,decisionId,coreConflict,likelyPastChoice,branches,inertiaPatterns,blindSpots,futureEvaluation,evidence,minimumAction,uncertaintyNote,createdAt。\n当前决策：${JSON.stringify(decision)}\n相关记忆：${JSON.stringify(memories.slice(0, 8))}`,
+      instructions: "You are AnotherMe's decision simulation module. Do not predict fate or make the final decision for the user. Separate facts, inferences, and suggestions. Output JSON matching the TypeScript SimulationResult structure.",
+      input: `Generate an explainable A/B future-branch simulation based on the current decision and relevant memories. Required fields: id,decisionId,coreConflict,likelyPastChoice,branches,inertiaPatterns,blindSpots,futureEvaluation,evidence,minimumAction,uncertaintyNote,createdAt.\nCurrent decision: ${JSON.stringify(decision)}\nRelevant memories: ${JSON.stringify(memories.slice(0, 8))}`,
     });
 
     return NextResponse.json({

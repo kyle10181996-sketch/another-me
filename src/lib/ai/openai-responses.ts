@@ -23,7 +23,7 @@ export async function generateJson<T>(options: GenerateJsonOptions): Promise<T> 
     messages: [
       {
         role: "system",
-        content: `${options.instructions}\n\n你必须只返回一个合法 JSON 对象，不要使用 Markdown 代码块，不要输出解释文字。`,
+        content: `${options.instructions}\n\nReturn only one valid JSON object. Do not use Markdown code fences. Do not add explanatory text outside the JSON.`,
       },
       {
         role: "user",

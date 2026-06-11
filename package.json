@@ -15,7 +15,7 @@
   "main": "electron/main.cjs",
   "build": {
     "appId": "com.anotherme.local",
-    "productName": "世另我",
+    "productName": "AnotherMe",
     "directories": {
       "output": "release"
     },

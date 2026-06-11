@@ -2,12 +2,12 @@ import type { Memory, MemoryType } from "@/lib/types";
 import { classifyRisk } from "@/lib/safety/classify-risk";
 
 const typeRules: Array<{ type: MemoryType; title: string; terms: string[] }> = [
-  { type: "fear", title: "反复出现的担心", terms: ["担心", "害怕", "焦虑", "怕"] },
-  { type: "desire", title: "被点亮的愿望", terms: ["希望", "想", "期待", "兴奋"] },
-  { type: "lesson", title: "近期学到的经验", terms: ["学到", "意识到", "复盘", "下次"] },
-  { type: "blind_spot", title: "可能需要留意的盲区", terms: ["又", "总是", "忍不住", "拖延"] },
-  { type: "value", title: "正在浮现的价值观", terms: ["重要", "在乎", "长期", "价值"] },
-  { type: "goal", title: "正在靠近的目标", terms: ["目标", "计划", "完成", "坚持"] },
+  { type: "fear", title: "Recurring concern", terms: ["worry", "afraid", "fear", "anxious", "concern"] },
+  { type: "desire", title: "Emerging desire", terms: ["want", "hope", "excited", "expect", "wish"] },
+  { type: "lesson", title: "Recent lesson", terms: ["learned", "realized", "review", "next time"] },
+  { type: "blind_spot", title: "Possible blind spot", terms: ["again", "always", "can't help", "procrastinate"] },
+  { type: "value", title: "Emerging value", terms: ["important", "care", "long-term", "value"] },
+  { type: "goal", title: "Active goal", terms: ["goal", "plan", "finish", "commit"] },
 ];
 
 function hasAny(text: string, terms: string[]) {
@@ -44,12 +44,12 @@ function buildMemoryContent(rawText: string, type: MemoryType) {
   const compact = rawText.trim().replace(/\s+/g, " ");
   const excerpt = compact.length > 96 ? `${compact.slice(0, 96)}...` : compact;
 
-  if (type === "fear") return `用户在这段记录中呈现出需要被认真看见的担心：${excerpt}`;
-  if (type === "desire") return `用户被某个方向吸引，并期待它能带来改变：${excerpt}`;
-  if (type === "blind_spot") return `这段记录提示一个需要小步验证的盲区，避免把兴奋直接变成过大的承诺：${excerpt}`;
-  if (type === "value") return `用户可能正在强调一个长期价值，但仍需要更多记录验证：${excerpt}`;
-  if (type === "goal") return `用户表达了一个可以拆成近期行动的目标：${excerpt}`;
-  if (type === "lesson") return `用户从近期经历中提炼了一个可复用经验：${excerpt}`;
+  if (type === "fear") return `This log points to a concern that should be taken seriously: ${excerpt}`;
+  if (type === "desire") return `The user seems drawn toward a direction they hope could create change: ${excerpt}`;
+  if (type === "blind_spot") return `This log suggests a blind spot worth testing in small steps before turning excitement into a large commitment: ${excerpt}`;
+  if (type === "value") return `The user may be emphasizing a long-term value, though more evidence would help confirm it: ${excerpt}`;
+  if (type === "goal") return `The user expressed a goal that can be broken into near-term action: ${excerpt}`;
+  if (type === "lesson") return `The user extracted a reusable lesson from recent experience: ${excerpt}`;
   return excerpt;
 }
 

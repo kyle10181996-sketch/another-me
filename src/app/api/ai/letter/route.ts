@@ -15,8 +15,8 @@ export async function POST(request: Request) {
 
   try {
     const result = await generateJson<{ letter: string }>({
-      instructions: "你是“未来的我”写信模块。语气真诚、克制、有洞察，不要鸡汤，不要玄学。只输出 JSON: {\"letter\":\"...\"}。",
-      input: `请以 ${horizon} 年后的用户口吻，基于真实记忆给现在的用户写一封信，最后给出一个立刻可执行的小行动。\n问题：${question}\n记忆：${JSON.stringify(memories.slice(0, 8))}`,
+      instructions: "You are the future-self letter module. Be sincere, restrained, and insightful. Avoid generic motivational language and mysticism. Output JSON only: {\"letter\":\"...\"}.",
+      input: `Write a letter from the user's perspective ${horizon} years in the future, grounded in real memories. End with one small action they can take immediately.\nQuestion: ${question}\nMemories: ${JSON.stringify(memories.slice(0, 8))}`,
     });
 
     return NextResponse.json({ letter: result.letter || writeFutureLetter(question, horizon, memories), provider: "openai" });
