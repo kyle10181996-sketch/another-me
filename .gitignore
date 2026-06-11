@@ -1,0 +1,9 @@
+node_modules
+.next
+out
+release
+
+.env
+.env*
+
+data/*.json
