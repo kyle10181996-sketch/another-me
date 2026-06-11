@@ -7,8 +7,8 @@
     "build": "next build",
     "build:desktop": "next build && node scripts/prepare-electron.mjs",
     "desktop": "npm run build:desktop && electron .",
-    "dist": "npm run build:desktop && electron-builder",
-    "dist:win": "npm run build:desktop && electron-builder --win nsis portable --x64",
+    "dist": "npm run build:desktop && electron-builder --publish never",
+    "dist:win": "npm run build:desktop && electron-builder --win nsis portable --x64 --publish never",
     "start": "next start",
     "lint": "eslint ."
   },
