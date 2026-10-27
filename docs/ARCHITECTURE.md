@@ -21,6 +21,7 @@ src/app/page.tsx
 - `src/lib/ai/decision-simulator.ts`：未来分支模拟
 - `src/lib/ai/letter-writer.ts`：未来来信
 - `src/lib/safety/classify-risk.ts`：风险识别和安全回复
+- `src/lib/trading/*`：A 股模拟交易、逐笔复盘、策略蒸馏与回测（见 `docs/TRADING.md`）
 
 ## 生产化迁移
 

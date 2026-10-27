@@ -11,6 +11,7 @@ It is not a fortune-telling tool, and it does not make decisions for you. Its pu
 - Decision simulation: compare A/B options across 1-year, 3-year, and 10-year branches
 - Future-self letters: generate letters grounded in your actual memory base
 - Timeline: review logs, choices, and outcomes over time
+- A-share simulator: paper-trade A-shares under real market rules (T+1, lot sizes, price limits, fees), get every trade reviewed, and distill your own profitable patterns into a rule-based strategy that trades a separate simulated account (see `docs/TRADING.md`)
 - Local-first storage: memories, logs, and model settings stay on your device
 - Multi-provider AI: supports OpenAI-compatible APIs such as OpenAI, DeepSeek, Qwen, and Kimi
 

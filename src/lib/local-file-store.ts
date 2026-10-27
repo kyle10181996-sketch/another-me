@@ -3,7 +3,7 @@ import path from "node:path";
 import type { AppState, LocalSettings, PublicSettings } from "@/lib/types";
 import { initialState } from "@/lib/storage";
 
-const dataDirectory = process.env.ANOTHER_ME_DATA_DIR || path.join(process.cwd(), "data");
+export const dataDirectory = process.env.ANOTHER_ME_DATA_DIR || path.join(process.cwd(), "data");
 const statePath = path.join(dataDirectory, "another-me-state.json");
 const settingsPath = path.join(dataDirectory, "settings.json");
 

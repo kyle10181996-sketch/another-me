@@ -36,3 +36,58 @@ export function getSafetyResponse(type: RiskType) {
 
   return null;
 }
+
+// ---------- Trading simulator ----------
+// Trade notes are checked for crisis language and for real-money danger signals (borrowed money, leverage,
+// "winning it back"). The simulator itself uses virtual money, but these notes often describe real life.
+
+const tradingLeverageTerms = [
+  "borrow",
+  "loan",
+  "margin",
+  "leverage",
+  "all in",
+  "all-in",
+  "mortgage",
+  "credit card",
+  "win it back",
+  "make it back",
+  "借钱",
+  "借款",
+  "贷款",
+  "网贷",
+  "信用卡",
+  "融资",
+  "杠杆",
+  "配资",
+  "梭哈",
+  "全仓",
+  "回本",
+  "翻本",
+  "房贷",
+  "抵押",
+];
+
+export type TradingRiskType = "crisis" | "leverage" | "none";
+
+export function classifyTradingRisk(text: string): TradingRiskType {
+  const lower = text.toLowerCase();
+  if (includesAny(lower, crisisTerms)) return "crisis";
+  if (includesAny(lower, tradingLeverageTerms)) return "leverage";
+  return "none";
+}
+
+export function getTradingSafetyNote(type: TradingRiskType) {
+  if (type === "crisis") {
+    return getSafetyResponse("crisis");
+  }
+
+  if (type === "leverage") {
+    return "Your note mentions borrowed money, leverage, going all-in, or winning losses back. In real markets these are the patterns most linked to large, hard-to-recover losses. Please do not move real or borrowed money based on simulated results, and consider talking it through with someone you trust or a licensed advisor.";
+  }
+
+  return null;
+}
+
+export const tradingDisclaimer =
+  "This is a simulator with virtual money. Analysis here reviews your process and patterns; it is not investment advice, does not predict prices, and past simulated results do not guarantee future results.";

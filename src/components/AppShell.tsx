@@ -1,6 +1,7 @@
 "use client";
 
-import { BookOpen, Brain, CalendarDays, GitBranch, KeyRound, LetterText, ShieldCheck, Sparkles, Trash2 } from "lucide-react";
+import { BookOpen, Brain, CalendarDays, CandlestickChart, GitBranch, KeyRound, LetterText, ShieldCheck, Sparkles, Trash2 } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { generateProfile } from "@/lib/ai/profile-generator";
 import type { LetterHorizon } from "@/lib/ai/letter-writer";
@@ -232,6 +233,14 @@ export function AppShell() {
               </button>
             );
           })}
+          <Link
+            href="/trading"
+            className="inline-flex min-h-10 items-center gap-2 rounded-md border border-[var(--line)] bg-white/55 px-3 py-2 text-sm font-medium text-[var(--ink)] transition hover:bg-white/80"
+            title="A-Share Simulator"
+          >
+            <CandlestickChart size={17} />
+            <span>A-Share Sim</span>
+          </Link>
         </div>
       </header>
 
