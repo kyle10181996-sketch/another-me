@@ -6,20 +6,21 @@ import { buildRoundTrips, computeStats, groupStats } from "@/lib/trading/analyti
 import { aggregateByEntry, MIN_ROUND_TRIPS, type DistillResult } from "@/lib/trading/distiller";
 import type { AccountView } from "@/lib/trading/engine";
 import { flagDescriptions, positiveFlags } from "@/lib/trading/trade-reviewer";
+import { emotionLabel } from "@/lib/trading/labels";
 import type { DistilledStrategy, PerformanceStats, StrategyLogEntry, Trade, TradingState } from "@/lib/trading/types";
 import { api, Button, Card, Empty, money, Notice, signClass, signed, Stat } from "@/components/trading/ui";
 
 function StatsGrid({ stats }: { stats: PerformanceStats }) {
   return (
     <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-      <Stat label="Closed trades" value={stats.count} />
-      <Stat label="Win rate" value={`${stats.winRate}%`} />
-      <Stat label="Avg return" value={signed(stats.avgReturnPct)} tone={signClass(stats.avgReturnPct)} />
-      <Stat label="Profit factor" value={stats.profitFactor} />
-      <Stat label="Avg win / loss" value={`${signed(stats.avgWinPct)} / ${signed(stats.avgLossPct)}`} />
-      <Stat label="Realized P&L" value={money(stats.totalPnl, 0)} tone={signClass(stats.totalPnl)} />
-      <Stat label="Avg hold" value={`${stats.avgHoldDays} d`} />
-      <Stat label="Max drawdown" value={`${stats.maxDrawdownPct}%`} />
+      <Stat label="已平仓" value={stats.count} />
+      <Stat label="胜率" value={`${stats.winRate}%`} />
+      <Stat label="平均收益" value={signed(stats.avgReturnPct)} tone={signClass(stats.avgReturnPct)} />
+      <Stat label="盈亏比因子" value={stats.profitFactor} />
+      <Stat label="平均盈利 / 亏损" value={`${signed(stats.avgWinPct)} / ${signed(stats.avgLossPct)}`} />
+      <Stat label="已实现盈亏" value={money(stats.totalPnl, 0)} tone={signClass(stats.totalPnl)} />
+      <Stat label="平均持有" value={`${stats.avgHoldDays} 天`} />
+      <Stat label="最大回撤" value={`${stats.maxDrawdownPct}%`} />
     </div>
   );
 }
@@ -37,33 +38,33 @@ export function InsightsPanel({ state, manual, strategy }: { state: TradingState
 
   return (
     <div className="grid gap-4">
-      <Card title="My closed trades">
+      <Card title="我的已平仓交易">
         <StatsGrid stats={stats} />
         <div className="mt-3">
-          <p className="text-xs text-[var(--muted)]">Progress to strategy distillation: {trips.length}/{MIN_ROUND_TRIPS} closed trades</p>
+          <p className="text-xs text-[var(--muted)]">策略蒸馏进度：已平仓 {trips.length}/{MIN_ROUND_TRIPS} 笔</p>
           <div className="mt-1 h-2 overflow-hidden rounded bg-[var(--panel-strong)]">
             <div className="h-full bg-[var(--accent)]" style={{ width: `${progress}%` }} />
           </div>
         </div>
       </Card>
 
-      <Card title="Me vs. my strategy">
+      <Card title="我 vs. 我的策略">
         <div className="grid grid-cols-2 gap-2">
-          <Stat label="My account return" value={signed(manual.totalReturnPct)} tone={signClass(manual.totalReturnPct)} />
-          <Stat label="Strategy account return" value={signed(strategy.totalReturnPct)} tone={signClass(strategy.totalReturnPct)} />
+          <Stat label="我的账户收益" value={signed(manual.totalReturnPct)} tone={signClass(manual.totalReturnPct)} />
+          <Stat label="策略账户收益" value={signed(strategy.totalReturnPct)} tone={signClass(strategy.totalReturnPct)} />
         </div>
-        <p className="mt-2 text-xs leading-5 text-[var(--muted)]">Both accounts start with the same virtual cash. The comparison only means something once both have traded over the same period.</p>
+        <p className="mt-2 text-xs leading-5 text-[var(--muted)]">两个账户起始资金相同。只有两边在同一段时间里都交易过，对比才有意义。</p>
       </Card>
 
-      <Card title="Results by emotion at entry">
+      <Card title="按买入时情绪统计">
         {byEmotion.length === 0 ? (
-          <Empty>Close a few trades to see how your mood at entry relates to results.</Empty>
+          <Empty>平仓几笔之后，就能看到买入时的情绪和结果之间的关系。</Empty>
         ) : (
           <div className="grid gap-2">
             {byEmotion.map(({ key, stats: group }) => (
               <div key={key} className="grid grid-cols-[6rem_1fr_auto] items-center gap-2 rounded-md bg-[var(--panel)] px-3 py-2 text-sm">
-                <span className="font-semibold capitalize">{key}</span>
-                <span className="text-xs text-[var(--muted)]">{group.count} trades · win {group.winRate}%</span>
+                <span className="font-semibold">{emotionLabel(key)}</span>
+                <span className="text-xs text-[var(--muted)]">{group.count} 笔 · 胜率 {group.winRate}%</span>
                 <span className={`tabular-nums ${signClass(group.avgReturnPct)}`}>{signed(group.avgReturnPct)}</span>
               </div>
             ))}
@@ -71,9 +72,9 @@ export function InsightsPanel({ state, manual, strategy }: { state: TradingState
         )}
       </Card>
 
-      <Card title={`Recurring process issues${manualReviews.length ? ` · avg process score ${avgScore}` : ""}`}>
+      <Card title={`反复出现的问题${manualReviews.length ? ` · 平均过程分 ${avgScore}` : ""}`}>
         {topFlags.length === 0 ? (
-          <Empty>No reviewed trades yet.</Empty>
+          <Empty>还没有复盘过的交易。</Empty>
         ) : (
           <div className="grid gap-2">
             {topFlags.map(([flag, count]) => (
@@ -121,9 +122,9 @@ export function StrategyPanel({
 
   return (
     <div className="grid gap-4">
-      <Card title="Distill my pattern">
+      <Card title="蒸馏我的交易模式">
         <p className="text-sm leading-6 text-[var(--muted)]">
-          Looks at the market conditions around each of your closed trades, finds the conditions your winners had in common, and turns them into fixed entry/exit rules. Mood is not an input, so the strategy cannot trade on FOMO or fear. It then backtests the rules on about a year of daily data.
+          查看你每笔已平仓交易买入时的市场情况，找出盈利单的共同条件，变成固定的买卖规则。情绪不参与策略，所以策略不会因为怕错过或恐惧而交易。随后用约一年的日线数据回测这些规则。
         </p>
         <Button
           className="mt-3"
@@ -131,37 +132,37 @@ export function StrategyPanel({
           onClick={() =>
             void call({ action: "distill" }, (result) => {
               const distill = result.result as DistillResult;
-              setMessage(distill.ready ? { tone: "info", text: `Created ${distill.strategy.name}. Review the backtest before activating it.` } : { tone: "warn", text: distill.reason });
+              setMessage(distill.ready ? { tone: "info", text: `已生成「${distill.strategy.name}」。启用前请先看看回测结果。` } : { tone: "warn", text: distill.reason });
             })
           }
         >
-          <FlaskConical size={16} /> {busy ? "Working…" : `Distill from ${closed} closed trades`}
+          <FlaskConical size={16} /> {busy ? "处理中…" : `用 ${closed} 笔已平仓交易蒸馏`}
         </Button>
-        {closed < MIN_ROUND_TRIPS && <p className="mt-2 text-xs text-[var(--muted)]">Needs at least {MIN_ROUND_TRIPS} closed trades.</p>}
+        {closed < MIN_ROUND_TRIPS && <p className="mt-2 text-xs text-[var(--muted)]">至少需要 {MIN_ROUND_TRIPS} 笔已平仓交易。</p>}
       </Card>
 
       {message && <Notice tone={message.tone}>{message.text}</Notice>}
 
       {active && (
-        <Card title={`Running: ${active.name}`}>
+        <Card title={`运行中：${active.name}`}>
           <p className="text-sm leading-6 text-[var(--muted)]">
-            The strategy trades only the separate Strategy Account. Each run checks exits for its holdings, then looks for entry signals in its stock list.
+            策略只在独立的策略账户里交易。每次运行先检查持仓是否该卖，再在股票池里寻找买入信号。
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             <Button disabled={busy} onClick={() => void call({ action: "run" })}>
-              <Play size={16} /> Run one cycle now
+              <Play size={16} /> 立即运行一次
             </Button>
             <Button variant={autoRun ? "primary" : "ghost"} onClick={() => onAutoRun(!autoRun)}>
-              {autoRun ? <Pause size={16} /> : <Bot size={16} />} {autoRun ? "Auto-run on" : "Auto-run every 5 min"}
+              {autoRun ? <Pause size={16} /> : <Bot size={16} />} {autoRun ? "自动运行中" : "每 5 分钟自动运行"}
             </Button>
           </div>
-          <p className="mt-2 text-xs leading-5 text-[var(--muted)]">Auto-run works while this page stays open, during trading hours only.</p>
+          <p className="mt-2 text-xs leading-5 text-[var(--muted)]">自动运行只在本页面保持打开、且处于交易时段时生效。</p>
           <StrategyLog entries={state.strategyLog.filter((entry) => entry.strategyId === active.id).slice(0, 15)} />
         </Card>
       )}
 
       {state.strategies.length === 0 ? (
-        <Empty>No strategies yet.</Empty>
+        <Empty>还没有策略。</Empty>
       ) : (
         state.strategies.map((strategy) => (
           <StrategyCard
@@ -184,7 +185,7 @@ function StrategyLog({ entries }: { entries: StrategyLogEntry[] }) {
     <ul className="mt-3 grid gap-1 text-xs leading-5">
       {entries.map((entry) => (
         <li key={entry.id} className="rounded bg-[var(--panel)] px-2 py-1">
-          <span className="text-[var(--muted)]">{new Date(entry.at).toLocaleString("en-GB", { timeZone: "Asia/Shanghai", hour12: false })} </span>
+          <span className="text-[var(--muted)]">{new Date(entry.at).toLocaleString("zh-CN", { timeZone: "Asia/Shanghai", hour12: false })} </span>
           {entry.message}
         </li>
       ))}
@@ -201,37 +202,37 @@ function StrategyCard({ strategy, trades, busy, onActivate, onRetire }: { strate
       title={
         <span className="flex items-center gap-2">
           {strategy.name}
-          <span className={`rounded px-2 py-0.5 text-xs font-semibold ${statusStyle}`}>{strategy.status}</span>
+          <span className={`rounded px-2 py-0.5 text-xs font-semibold ${statusStyle}`}>{{ draft: "草稿", active: "运行中", retired: "已停用" }[strategy.status]}</span>
         </span>
       }
       action={
         strategy.status === "active" ? (
-          <Button variant="ghost" disabled={busy} onClick={onRetire}><RotateCcw size={15} /> Retire</Button>
+          <Button variant="ghost" disabled={busy} onClick={onRetire}><RotateCcw size={15} /> 停用</Button>
         ) : (
-          <Button variant="ghost" disabled={busy} onClick={onActivate}><Play size={15} /> Activate</Button>
+          <Button variant="ghost" disabled={busy} onClick={onActivate}><Play size={15} /> 启用</Button>
         )
       }
     >
-      <p className="text-sm font-semibold">Entry: all of these</p>
+      <p className="text-sm font-semibold">买入条件（同时满足）</p>
       <ul className="mt-1 grid gap-1 text-sm">
         {strategy.entryConditions.map((condition) => (
           <li key={condition.label} className="rounded bg-[var(--panel)] px-2 py-1">
-            {condition.label} <span className="text-xs text-[var(--muted)]">({condition.sample} of your trades, win {condition.winRate}%, avg {signed(condition.avgReturnPct)})</span>
+            {condition.label} <span className="text-xs text-[var(--muted)]">(你的 {condition.sample} 笔交易，胜率 {condition.winRate}%，平均 {signed(condition.avgReturnPct)})</span>
           </li>
         ))}
       </ul>
       <p className="mt-3 text-sm">
-        <strong>Exit:</strong> stop −{strategy.exit.stopLossPct}% · target +{strategy.exit.takeProfitPct}% · max {strategy.exit.maxHoldDays} days
+        <strong>离场：</strong>止损 −{strategy.exit.stopLossPct}% · 止盈 +{strategy.exit.takeProfitPct}% · 最长持有 {strategy.exit.maxHoldDays} 天
         <br />
-        <strong>Size:</strong> {strategy.sizing.positionPct}% of equity per stock, up to {strategy.sizing.maxPositions} stocks · {strategy.universe.length} stocks in its list
+        <strong>仓位：</strong>每只 {strategy.sizing.positionPct}% 总资产，最多 {strategy.sizing.maxPositions} 只 · 股票池 {strategy.universe.length} 只
       </p>
 
-      <p className="mt-3 text-sm font-semibold">Your trades matching these rules (in-sample)</p>
+      <p className="mt-3 text-sm font-semibold">你的交易中符合这些规则的部分（样本内）</p>
       <div className="mt-1"><StatsGrid stats={strategy.matchedStats} /></div>
 
       {strategy.backtest && (
         <>
-          <p className="mt-3 text-sm font-semibold">Backtest {strategy.backtest.from} → {strategy.backtest.to}</p>
+          <p className="mt-3 text-sm font-semibold">回测 {strategy.backtest.from} → {strategy.backtest.to}</p>
           <div className="mt-1"><StatsGrid stats={strategy.backtest.stats} /></div>
           <ul className="mt-2 list-disc space-y-1 pl-5 text-xs leading-5 text-[var(--warning)]">
             {strategy.backtest.warnings.map((warning) => <li key={warning}>{warning}</li>)}
@@ -241,7 +242,7 @@ function StrategyCard({ strategy, trades, busy, onActivate, onRetire }: { strate
 
       {trades.length > 0 && (
         <p className="mt-3 text-sm">
-          Live simulated trades: {trades.length} · realized <span className={signClass(realized)}>{money(realized)}</span>
+          模拟盘实际交易：{trades.length} 笔 · 已实现盈亏 <span className={signClass(realized)}>{money(realized)}</span>
         </p>
       )}
 
@@ -262,7 +263,7 @@ export function SettingsPanel({ state, onState }: { state: TradingState; onState
   async function patch(body: object) {
     try {
       onState(await api<TradingState>("/api/trading/state", { method: "PATCH", body: JSON.stringify(body) }));
-      setMessage("Saved.");
+      setMessage("已保存。");
     } catch (error) {
       setMessage((error as Error).message);
     }
@@ -272,7 +273,7 @@ export function SettingsPanel({ state, onState }: { state: TradingState; onState
     try {
       onState(await api<TradingState>("/api/trading/state", { method: "POST", body: JSON.stringify({ action: "reset", initialCash: Number(cash) }) }));
       setConfirmReset(false);
-      setMessage("Accounts reset.");
+      setMessage("账户已重置。");
     } catch (error) {
       setMessage((error as Error).message);
     }
@@ -280,39 +281,39 @@ export function SettingsPanel({ state, onState }: { state: TradingState; onState
 
   return (
     <div className="grid gap-4">
-      <Card title="Market data">
+      <Card title="行情数据">
         <div className="grid gap-2">
           <label className="flex items-start gap-2 text-sm">
             <input type="radio" className="mt-1" checked={state.settings.dataSource === "tencent"} onChange={() => void patch({ settings: { dataSource: "tencent" } })} />
-            <span><strong>Live quotes (Tencent)</strong><br /><span className="text-[var(--muted)]">Real A-share prices from a free public feed. Unofficial and may be delayed.</span></span>
+            <span><strong>实时行情（腾讯）</strong><br /><span className="text-[var(--muted)]">来自免费公开接口的真实 A 股价格。非官方接口，可能有延迟。</span></span>
           </label>
           <label className="flex items-start gap-2 text-sm">
             <input type="radio" className="mt-1" checked={state.settings.dataSource === "mock"} onChange={() => void patch({ settings: { dataSource: "mock" } })} />
-            <span><strong>Mock prices</strong><br /><span className="text-[var(--muted)]">Generated fake prices for trying the app offline. Do not learn patterns from these.</span></span>
+            <span><strong>模拟行情</strong><br /><span className="text-[var(--muted)]">生成的假价格，用于离线试用。不要从中总结交易模式。</span></span>
           </label>
           <label className="mt-2 flex items-start gap-2 text-sm">
             <input type="checkbox" className="mt-1" checked={state.settings.enforceTradingHours} onChange={(event) => void patch({ settings: { enforceTradingHours: event.target.checked } })} />
-            <span><strong>Only fill orders during trading hours</strong><br /><span className="text-[var(--muted)]">09:30-11:30 and 13:00-15:00 China time. Turning this off lets you trade at the last price after hours, which is less realistic.</span></span>
+            <span><strong>只在交易时段成交</strong><br /><span className="text-[var(--muted)]">北京时间 09:30-11:30、13:00-15:00。关闭后可以在收盘后按最新价成交，但不够真实。</span></span>
           </label>
         </div>
       </Card>
 
-      <Card title="Watchlist (also the strategy's stock list)">
+      <Card title="自选股（也是策略的股票池）">
         <textarea value={watchlist} onChange={(event) => setWatchlist(event.target.value)} rows={3} className="w-full p-3 text-sm" placeholder="600519, 000001, 300750" />
-        <Button className="mt-2" onClick={() => void patch({ watchlist: watchlist.split(/[\s,，]+/).filter(Boolean) })}>Save watchlist</Button>
+        <Button className="mt-2" onClick={() => void patch({ watchlist: watchlist.split(/[\s,，]+/).filter(Boolean) })}>保存自选股</Button>
       </Card>
 
-      <Card title="Reset accounts">
-        <p className="text-sm leading-6 text-[var(--muted)]">Clears all trades, reviews and positions in both accounts and restarts them with this much virtual cash. Strategies are kept but deactivated.</p>
+      <Card title="重置账户">
+        <p className="text-sm leading-6 text-[var(--muted)]">清空两个账户的全部交易、复盘和持仓，并以下面的虚拟资金重新开始。策略会保留，但会被停用。</p>
         <div className="mt-2 flex flex-wrap gap-2">
           <input value={cash} onChange={(event) => setCash(event.target.value.replace(/\D/g, ""))} inputMode="numeric" className="min-h-10 w-40 px-3" />
           {confirmReset ? (
             <>
-              <Button variant="danger" onClick={() => void reset()}>Confirm reset</Button>
-              <Button variant="ghost" onClick={() => setConfirmReset(false)}>Cancel</Button>
+              <Button variant="danger" onClick={() => void reset()}>确认重置</Button>
+              <Button variant="ghost" onClick={() => setConfirmReset(false)}>取消</Button>
             </>
           ) : (
-            <Button variant="danger" onClick={() => setConfirmReset(true)}>Reset</Button>
+            <Button variant="danger" onClick={() => setConfirmReset(true)}>重置</Button>
           )}
         </div>
       </Card>

@@ -15,13 +15,13 @@ import { api, Notice, signClass, signed, money } from "@/components/trading/ui";
 type Tab = "trade" | "portfolio" | "journal" | "insights" | "coach" | "strategy" | "settings";
 
 const tabs: { id: Tab; label: string; icon: typeof Wallet }[] = [
-  { id: "trade", label: "Trade", icon: CandlestickChart },
-  { id: "portfolio", label: "Portfolio", icon: Wallet },
-  { id: "journal", label: "Journal", icon: NotebookPen },
-  { id: "insights", label: "Insights", icon: BarChart3 },
-  { id: "coach", label: "Coach", icon: MessageSquareText },
-  { id: "strategy", label: "Strategy", icon: Bot },
-  { id: "settings", label: "Settings", icon: Settings },
+  { id: "trade", label: "交易", icon: CandlestickChart },
+  { id: "portfolio", label: "持仓", icon: Wallet },
+  { id: "journal", label: "日志", icon: NotebookPen },
+  { id: "insights", label: "统计", icon: BarChart3 },
+  { id: "coach", label: "教练", icon: MessageSquareText },
+  { id: "strategy", label: "策略", icon: Bot },
+  { id: "settings", label: "设置", icon: Settings },
 ];
 
 const QUOTE_REFRESH_MS = 15_000;
@@ -93,13 +93,13 @@ export function TradingApp() {
   if (loadError) {
     return (
       <main className="mx-auto max-w-3xl px-4 py-8">
-        <Notice tone="error">Could not load the simulator: {loadError}</Notice>
+        <Notice tone="error">模拟器加载失败：{loadError}</Notice>
       </main>
     );
   }
 
   if (!state) {
-    return <main className="mx-auto max-w-3xl px-4 py-8 text-sm text-[var(--muted)]">Loading simulator…</main>;
+    return <main className="mx-auto max-w-3xl px-4 py-8 text-sm text-[var(--muted)]">正在加载模拟器…</main>;
   }
 
   const prices = Object.fromEntries(Object.values(quotes).map((quote) => [quote.symbol, quote.price]));
@@ -116,20 +116,20 @@ export function TradingApp() {
         </Link>
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="text-3xl font-semibold text-[var(--ink)] sm:text-4xl">A-Share Simulator</h1>
+            <h1 className="text-3xl font-semibold text-[var(--ink)] sm:text-4xl">A 股模拟交易</h1>
             <p className="mt-1 max-w-2xl text-sm leading-6 text-[var(--muted)]">
-              Trade with virtual money, journal every decision, and let your own profitable patterns become a rule-based strategy.
+              用虚拟资金交易，记录每一次决策，把你自己赚钱的模式变成规则化的策略。
             </p>
           </div>
           <span className={`rounded-md px-2 py-1 text-xs font-semibold ring-1 ring-[var(--line)] ${state.settings.dataSource === "mock" ? "bg-[#fff4e6] text-[var(--warning)]" : "bg-white/60 text-[var(--accent)]"}`}>
-            {state.settings.dataSource === "mock" ? "MOCK PRICES" : "Live quotes · Tencent"}
+            {state.settings.dataSource === "mock" ? "模拟行情" : "实时行情 · 腾讯"}
           </span>
         </div>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          <SummaryTile label="My equity" value={money(manual.equity, 0)} sub={signed(manual.totalReturnPct)} subValue={manual.totalReturnPct} />
-          <SummaryTile label="My cash" value={money(manual.account.cash, 0)} sub={`${manual.positions.length} positions`} />
-          <SummaryTile label="Strategy equity" value={money(strategyView.equity, 0)} sub={signed(strategyView.totalReturnPct)} subValue={strategyView.totalReturnPct} />
-          <SummaryTile label="Active strategy" value={activeStrategy ? activeStrategy.name : "None"} sub={activeStrategy ? (autoRun ? "Auto-run on" : "Manual runs") : "Distill one first"} />
+          <SummaryTile label="我的总资产" value={money(manual.equity, 0)} sub={signed(manual.totalReturnPct)} subValue={manual.totalReturnPct} />
+          <SummaryTile label="我的现金" value={money(manual.account.cash, 0)} sub={`持仓 ${manual.positions.length} 只`} />
+          <SummaryTile label="策略账户总资产" value={money(strategyView.equity, 0)} sub={signed(strategyView.totalReturnPct)} subValue={strategyView.totalReturnPct} />
+          <SummaryTile label="运行中的策略" value={activeStrategy ? activeStrategy.name : "无"} sub={activeStrategy ? (autoRun ? "自动运行中" : "手动运行") : "请先蒸馏策略"} />
         </div>
       </header>
 

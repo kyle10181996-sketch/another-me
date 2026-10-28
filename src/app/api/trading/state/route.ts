@@ -20,7 +20,7 @@ export async function PATCH(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    if (body.action !== "reset") return NextResponse.json({ error: "Unknown action." }, { status: 400 });
+    if (body.action !== "reset") return NextResponse.json({ error: "未知操作。" }, { status: 400 });
     const { state } = await resetAccounts(body.initialCash);
     return NextResponse.json(state);
   } catch (error) {

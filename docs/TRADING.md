@@ -1,6 +1,8 @@
 # A 股模拟交易（A-Share Simulator）
 
-入口：应用首页导航栏 `A-Share Sim`，或直接访问 `/trading`。
+入口：应用首页导航栏 `A 股模拟`，或直接访问 `/trading`。
+
+模拟交易模块的界面、复盘、分析、策略说明和导出内容均为中文；AI 提示词要求所有面向用户的输出使用简体中文。中文显示标签集中在 `src/lib/trading/labels.ts`。
 
 ## 目标
 

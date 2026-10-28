@@ -79,15 +79,15 @@ export function classifyTradingRisk(text: string): TradingRiskType {
 
 export function getTradingSafetyNote(type: TradingRiskType) {
   if (type === "crisis") {
-    return getSafetyResponse("crisis");
+    return "我很在意你现在的安全。这不是 AI 能单独陪你处理的事。请马上联系你信任的人，或拨打当地的紧急求助电话或心理危机热线。";
   }
 
   if (type === "leverage") {
-    return "Your note mentions borrowed money, leverage, going all-in, or winning losses back. In real markets these are the patterns most linked to large, hard-to-recover losses. Please do not move real or borrowed money based on simulated results, and consider talking it through with someone you trust or a licensed advisor.";
+    return "你提到了借钱、加杠杆、梭哈或想把亏损赚回来。在真实市场里，这些正是最容易造成巨大且难以挽回损失的做法。请不要根据模拟盘的结果投入真实资金或借来的钱，可以先和信任的人或持牌顾问聊一聊。";
   }
 
   return null;
 }
 
 export const tradingDisclaimer =
-  "This is a simulator with virtual money. Analysis here reviews your process and patterns; it is not investment advice, does not predict prices, and past simulated results do not guarantee future results.";
+  "这是使用虚拟资金的模拟器。这里的分析评价的是你的交易过程和习惯，不构成投资建议，不预测股价；过去的模拟结果不代表未来收益。";

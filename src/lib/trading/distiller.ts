@@ -74,7 +74,7 @@ export function distillStrategy(
   if (samples.length < MIN_ROUND_TRIPS) {
     return {
       ready: false,
-      reason: `Need at least ${MIN_ROUND_TRIPS} closed trades with recorded market context before a pattern can be distilled. You have ${samples.length}. Fewer trades than this would mostly capture luck.`,
+      reason: `至少需要 ${MIN_ROUND_TRIPS} 笔记录了市场情况的已平仓交易才能蒸馏模式，目前有 ${samples.length} 笔。样本再少，得出的多半只是运气。`,
       closedTrades: samples.length,
       required: MIN_ROUND_TRIPS,
     };
@@ -133,8 +133,8 @@ export function distillStrategy(
       ready: false,
       reason:
         sourceStats.avgReturnPct > 0
-          ? "Your trades are profitable overall, but no consistent market pattern separates your winners from your losers yet. Keep trading and journaling; the pattern may simply need more samples."
-          : "No group of your trades with a shared market pattern is profitable yet, so there is nothing reliable to distill. Use the trade reviews to fix process issues first.",
+          ? "你的交易整体是赚钱的，但还找不到能区分盈利单和亏损单的稳定市场规律。继续交易并写日志，可能只是样本还不够。"
+          : "目前还没有哪一类具有共同市场特征的交易是赚钱的，没有可靠的模式可以蒸馏。先根据逐笔复盘改进交易过程。",
       closedTrades: samples.length,
       required: MIN_ROUND_TRIPS,
     };
@@ -143,7 +143,7 @@ export function distillStrategy(
   if (matchedStats.avgReturnPct <= 0 || matchedStats.profitFactor <= 1) {
     return {
       ready: false,
-      reason: "The best pattern found is not clearly profitable after fees. Nothing worth automating yet.",
+      reason: "找到的最好模式扣除手续费后并不明显赚钱，暂时没有值得自动化的东西。",
       closedTrades: samples.length,
       required: MIN_ROUND_TRIPS,
     };
@@ -161,11 +161,11 @@ export function distillStrategy(
   const emotional = samples.filter((sample) => sample.entryJournal && emotionalStates.includes(sample.entryJournal.emotion));
   const emotionalStats = computeStats(emotional);
   const notes = [
-    `Built from ${samples.length} of your closed trades. ${current.length} of them match these rules; those had a ${matchedStats.winRate}% win rate and ${matchedStats.avgReturnPct}% average return, vs. ${sourceStats.winRate}% and ${sourceStats.avgReturnPct}% for all your trades.`,
+    `基于你的 ${samples.length} 笔已平仓交易。其中 ${current.length} 笔符合这些规则，胜率 ${matchedStats.winRate}%，平均收益 ${matchedStats.avgReturnPct}%；你全部交易的胜率是 ${sourceStats.winRate}%，平均收益 ${sourceStats.avgReturnPct}%。`,
     emotional.length
-      ? `${emotional.length} of your trades were tagged fomo/greedy/revenge/bored: ${emotionalStats.winRate}% win rate, ${emotionalStats.avgReturnPct}% average return. The strategy ignores mood entirely and only follows the market conditions and exits above.`
-      : "None of your trades were tagged with an emotional state, so the emotion filter could not be measured.",
-    `Exits come from your own history: stop at -${stopLossPct}% (typical loss), target at +${takeProfitPct}% (typical win), and close after ${maxHoldDays} days.`,
+      ? `你有 ${emotional.length} 笔交易标记为怕错过/贪婪/想报复/无聊：胜率 ${emotionalStats.winRate}%，平均收益 ${emotionalStats.avgReturnPct}%。策略完全不看情绪，只执行上面的市场条件和离场规则。`
+      : "你的交易都没有标记情绪化状态，所以无法衡量过滤情绪的效果。",
+    `离场规则来自你自己的历史：止损 -${stopLossPct}%（你的典型亏损），止盈 +${takeProfitPct}%（你的典型盈利），持有满 ${maxHoldDays} 天平仓。`,
   ];
 
   const now = (options.now ?? new Date()).toISOString();
@@ -175,7 +175,7 @@ export function distillStrategy(
     strategy: {
       id: `strat_${crypto.randomUUID()}`,
       userId: options.userId,
-      name: `My Pattern v${options.version}`,
+      name: `我的模式 v${options.version}`,
       version: options.version,
       status: "draft",
       basedOnRoundTrips: samples.length,
@@ -187,7 +187,7 @@ export function distillStrategy(
       matchedStats,
       notes,
       uncertaintyNote:
-        "These rules were fitted to the same trades they are measured on, so the in-sample numbers are optimistic. Markets change regime, and a pattern from a few dozen trades can be coincidence. Treat the strategy as a hypothesis to keep testing in the simulator, not as a reliable way to make money.",
+        "这些规则是用同一批交易拟合出来、又用同一批交易评估的，样本内数据偏乐观。市场风格会变，几十笔交易得出的规律也可能只是巧合。请把这个策略当成需要在模拟盘里继续检验的假设，而不是可靠的赚钱方法。",
       createdAt: now,
       updatedAt: now,
     },

@@ -36,11 +36,11 @@ export function runStrategyCycle(
     const held = daysBetween(earliestLotDate(position), today);
     const reason =
       pnlPct <= -strategy.exit.stopLossPct
-        ? `stop-loss hit (${pnlPct.toFixed(2)}%)`
+        ? `触发止损（${pnlPct.toFixed(2)}%）`
         : pnlPct >= strategy.exit.takeProfitPct
-          ? `target hit (+${pnlPct.toFixed(2)}%)`
+          ? `达到止盈（+${pnlPct.toFixed(2)}%）`
           : held >= strategy.exit.maxHoldDays
-            ? `max hold of ${strategy.exit.maxHoldDays} days reached`
+            ? `持有满 ${strategy.exit.maxHoldDays} 天`
             : null;
     if (!reason) continue;
 
@@ -53,14 +53,14 @@ export function runStrategyCycle(
         quote,
         now,
         strategyId: strategy.id,
-        journal: { reason: `${strategy.name}: ${reason}`, emotion: "calm", confidence: 3, tags: ["strategy"] },
+        journal: { reason: `${strategy.name}：${reason}`, emotion: "calm", confidence: 3, tags: ["strategy"] },
         features: bars[quote.symbol] ? computeFeatures(historyBefore(bars[quote.symbol], quote.tradeDate), snapshotFromQuote(quote)) : undefined,
       });
       next = result.state;
       trades.push(result.trade);
-      note(`Sold ${sellable} ${quote.name} (${quote.symbol}) at ¥${result.trade.price}: ${reason}.`);
+      note(`以 ¥${result.trade.price} 卖出 ${quote.name}（${quote.symbol}）${sellable} 股：${reason}。`);
     } catch (error) {
-      note(`Could not sell ${quote.symbol}: ${error instanceof TradingRuleError ? error.message : "unknown error"}`);
+      note(`无法卖出 ${quote.symbol}：${error instanceof TradingRuleError ? error.message : "未知错误"}`);
     }
   }
 
@@ -80,7 +80,7 @@ export function runStrategyCycle(
     const price = quote.ask1 > 0 ? quote.ask1 : quote.price;
     const quantity = roundDownToLot(symbol, (equity * strategy.sizing.positionPct) / 100 / price);
     if (!quantity) {
-      note(`Signal on ${symbol}, but the position size rounds to zero shares.`);
+      note(`${symbol} 出现买入信号，但按仓位计算不足一手。`);
       continue;
     }
 
@@ -95,7 +95,7 @@ export function runStrategyCycle(
         strategyId: strategy.id,
         features: { ...features, positionPctOfEquity: Math.round(((quantity * price) / equity) * 10_000) / 100 },
         journal: {
-          reason: `${strategy.name}: ${strategy.entryConditions.map((condition) => condition.label).join("; ")}`,
+          reason: `${strategy.name}：${strategy.entryConditions.map((condition) => condition.label).join("；")}`,
           emotion: "calm",
           confidence: 3,
           plannedStopLossPct: strategy.exit.stopLossPct,
@@ -106,13 +106,13 @@ export function runStrategyCycle(
       });
       next = result.state;
       trades.push(result.trade);
-      note(`Bought ${quantity} ${quote.name} (${symbol}) at ¥${result.trade.price}.`);
+      note(`以 ¥${result.trade.price} 买入 ${quote.name}（${symbol}）${quantity} 股。`);
     } catch (error) {
-      note(`Could not buy ${symbol}: ${error instanceof TradingRuleError ? error.message : "unknown error"}`);
+      note(`无法买入 ${symbol}：${error instanceof TradingRuleError ? error.message : "未知错误"}`);
     }
   }
 
-  if (!log.length) note("Checked all stocks in the universe. No entry or exit signals.");
+  if (!log.length) note("已检查股票池内所有股票，没有买入或卖出信号。");
 
   return {
     trades,

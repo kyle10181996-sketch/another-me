@@ -17,7 +17,7 @@ export function backtestStrategy(strategy: DistilledStrategy, barsBySymbol: Reco
 
   for (const [symbol, bars] of Object.entries(barsBySymbol)) {
     if (bars.length < WARMUP_BARS + 3) {
-      warnings.push(`${symbol}: not enough history, skipped.`);
+      warnings.push(`${symbol}：历史数据不足，已跳过。`);
       continue;
     }
     if (!from || bars[WARMUP_BARS].date < from) from = bars[WARMUP_BARS].date;
@@ -110,10 +110,10 @@ export function backtestStrategy(strategy: DistilledStrategy, barsBySymbol: Reco
     capital,
   );
 
-  if (trades.length < 30) warnings.push(`Only ${trades.length} backtest trades. That is too few to tell skill from luck.`);
-  warnings.push("Backtest uses daily bars and forward-adjusted prices; intraday fills and gaps can differ.");
-  warnings.push("Each stock is tested independently; the max-positions limit and cash competition between stocks are ignored.");
-  warnings.push("The period overlaps the trades the rules were learned from, so results are partly in-sample.");
+  if (trades.length < 30) warnings.push(`回测只有 ${trades.length} 笔交易，太少，分不清是能力还是运气。`);
+  warnings.push("回测使用前复权日线，盘中成交价和跳空情况可能不同。");
+  warnings.push("每只股票单独回测，没有考虑最多持仓数限制和股票之间争抢资金。");
+  warnings.push("回测区间和规则学习所用的交易有重叠，结果部分属于样本内。");
 
   return {
     from,

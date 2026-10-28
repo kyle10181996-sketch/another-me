@@ -26,7 +26,7 @@ export function createAccount(userId: string, kind: AccountKind, initialCash: nu
     id: `acct_${kind}`,
     userId,
     kind,
-    name: kind === "manual" ? "My Account" : "Strategy Account",
+    name: kind === "manual" ? "我的账户" : "策略账户",
     initialCash,
     cash: initialCash,
     positions: [],
@@ -140,14 +140,14 @@ function fillPrice(side: Side, quote: Quote) {
   if (side === "buy") {
     const hasAsk = quote.ask1 > 0 && quote.ask1 <= quote.limitUp;
     if (quote.price >= quote.limitUp && !hasAsk) {
-      throw new TradingRuleError("LIMIT_UP_SEALED", "The stock is sealed at limit-up with no sellers. The simulator assumes a buy order would not fill.");
+      throw new TradingRuleError("LIMIT_UP_SEALED", "该股封涨停、没有卖盘，模拟器按买单无法成交处理。");
     }
     return hasAsk ? quote.ask1 : Math.min(quote.price, quote.limitUp);
   }
 
   const hasBid = quote.bid1 > 0 && quote.bid1 >= quote.limitDown;
   if (quote.price <= quote.limitDown && !hasBid) {
-    throw new TradingRuleError("LIMIT_DOWN_SEALED", "The stock is sealed at limit-down with no buyers. The simulator assumes a sell order would not fill.");
+    throw new TradingRuleError("LIMIT_DOWN_SEALED", "该股封跌停、没有买盘，模拟器按卖单无法成交处理。");
   }
   return hasBid ? quote.bid1 : Math.max(quote.price, quote.limitDown);
 }
@@ -155,16 +155,16 @@ function fillPrice(side: Side, quote: Quote) {
 export function executeOrder(input: OrderInput): { state: TradingState; trade: Trade } {
   const { state, accountId, side, quantity, quote, now } = input;
   const account = state.accounts.find((item) => item.id === accountId);
-  if (!account) throw new TradingRuleError("NO_ACCOUNT", "Account not found.");
+  if (!account) throw new TradingRuleError("NO_ACCOUNT", "找不到账户。");
 
-  if (quote.suspended) throw new TradingRuleError("SUSPENDED", `${quote.name} is not trading today (suspended or not yet open).`);
+  if (quote.suspended) throw new TradingRuleError("SUSPENDED", `${quote.name} 今天没有交易（停牌或尚未开盘）。`);
 
   const today = shanghaiDate(now);
   if (state.settings.enforceTradingHours && quote.source !== "mock") {
     if (!isWithinTradingSession(now) || quote.tradeDate !== today) {
       throw new TradingRuleError(
         "MARKET_CLOSED",
-        "The A-share market is closed. Orders fill only during 09:30-11:30 and 13:00-15:00 China time on trading days. You can turn this check off in Settings.",
+        "A 股已休市。只在交易日北京时间 09:30-11:30、13:00-15:00 成交。可以在「设置」里关闭这项检查。",
       );
     }
   }
@@ -187,7 +187,7 @@ export function executeOrder(input: OrderInput): { state: TradingState; trade: T
   if (side === "buy") {
     const cost = amount + fees.total;
     if (cost > account.cash + 1e-6) {
-      throw new TradingRuleError("INSUFFICIENT_CASH", `Not enough cash: this order needs ¥${cost.toFixed(2)}, available ¥${account.cash.toFixed(2)}.`);
+      throw new TradingRuleError("INSUFFICIENT_CASH", `资金不足：这笔订单需要 ¥${cost.toFixed(2)}，可用 ¥${account.cash.toFixed(2)}。`);
     }
     cash = roundMoney(account.cash - cost);
     const lot = { tradeId, quantity, costPerShare: cost / quantity, tradeDate: today };

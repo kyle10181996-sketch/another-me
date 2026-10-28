@@ -9,7 +9,7 @@ export async function api<T>(url: string, init?: RequestInit): Promise<T> {
     headers: init?.body ? { "Content-Type": "application/json", ...init.headers } : init?.headers,
   });
   const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(typeof data.error === "string" ? data.error : `Request failed (${response.status}).`);
+  if (!response.ok) throw new Error(typeof data.error === "string" ? data.error : `请求失败（${response.status}）。`);
   return data as T;
 }
 

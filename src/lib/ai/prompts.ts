@@ -32,6 +32,8 @@ Rules:
 5. Give one concrete, testable process rule the user could adopt next time.
 6. Keep uncertainty explicit: one trade is a tiny sample.
 
+Write every user-facing string in Simplified Chinese (keep JSON keys and enum values such as verdict in English).
+
 Output JSON only:
 {"verdict":"disciplined|mixed|impulsive","score":0-100,"summary":"...","strengths":["..."],"issues":["..."],"suggestion":"...","uncertaintyNote":"..."}`;
 
@@ -41,6 +43,8 @@ Explain in plain language:
 1. What pattern of the user's own behavior the rules capture.
 2. Why the evidence is weak or strong (sample size, in-sample bias, market regime, fees).
 3. What would make the user stop trusting this strategy (clear invalidation signals).
+
+Write every user-facing string in Simplified Chinese (keep JSON keys and enum values such as verdict in English).
 
 Never claim the strategy will be profitable in the future and never recommend trading real money. Output JSON only:
 {"notes":["...","...","..."],"uncertaintyNote":"..."}`;
@@ -56,6 +60,8 @@ Rules:
 4. Be direct and specific; skip generic trading advice that is not tied to this user's data.
 5. Rules you propose must be concrete and checkable (e.g. "no buys when the stock is already up more than 7% that day").
 6. If the user mentions borrowed money, leverage, or chasing losses, say clearly that real or borrowed money should not follow simulated results.
+
+Write every user-facing string in Simplified Chinese (keep JSON keys and enum values such as verdict in English).
 
 Output JSON only:
 {"headline":"one-sentence summary","answer":"direct answer to the user's question, or empty string if none","working":["..."],"costing":["..."],"emotionalPatterns":["..."],"openPositionNotes":["..."],"rules":["..."],"uncertaintyNote":"..."}`;

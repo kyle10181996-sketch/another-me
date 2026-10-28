@@ -63,7 +63,7 @@ function parseTencentLine(symbol: string, payload: string): Quote | null {
 
 async function fetchTencentQuotes(symbols: string[]): Promise<Quote[]> {
   const response = await fetch(`${TENCENT_QUOTE_URL}${symbols.join(",")}`, { cache: "no-store", signal: AbortSignal.timeout(8000) });
-  if (!response.ok) throw new MarketDataError(`Quote service returned ${response.status}.`);
+  if (!response.ok) throw new MarketDataError(`行情服务返回 ${response.status}。`);
 
   const text = new TextDecoder("gbk").decode(await response.arrayBuffer());
   const quotes: Quote[] = [];
@@ -78,7 +78,7 @@ async function fetchTencentQuotes(symbols: string[]): Promise<Quote[]> {
 
 async function fetchTencentBars(symbol: string, count: number): Promise<Bar[]> {
   const response = await fetch(`${TENCENT_KLINE_URL}${symbol},day,,,${count},qfq`, { cache: "no-store", signal: AbortSignal.timeout(8000) });
-  if (!response.ok) throw new MarketDataError(`K-line service returned ${response.status}.`);
+  if (!response.ok) throw new MarketDataError(`K 线服务返回 ${response.status}。`);
 
   const data = await response.json();
   const node = data?.data?.[symbol];
@@ -151,7 +151,7 @@ function mockQuote(symbol: string, now: Date): Quote {
   return {
     symbol,
     code: symbol.slice(2),
-    name: `Mock ${symbol.slice(2)}`,
+    name: `模拟 ${symbol.slice(2)}`,
     price,
     prevClose,
     open: today.open,
@@ -183,7 +183,7 @@ export async function getQuotes(symbols: string[], source: DataSource, now = new
 
 export async function getQuote(symbol: string, source: DataSource, now = new Date()): Promise<Quote> {
   const [quote] = await getQuotes([symbol], source, now);
-  if (!quote) throw new MarketDataError(`No quote found for ${symbol}. Check the stock code.`);
+  if (!quote) throw new MarketDataError(`找不到 ${symbol} 的行情，请检查股票代码。`);
   return quote;
 }
 

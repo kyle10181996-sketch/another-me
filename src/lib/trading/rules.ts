@@ -42,7 +42,7 @@ export function boardOf(symbol: string): Board {
 }
 
 export function boardLabel(board: Board) {
-  return { main: "Main Board", chinext: "ChiNext", star: "STAR Market", bse: "Beijing SE" }[board];
+  return { main: "主板", chinext: "创业板", star: "科创板", bse: "北交所" }[board];
 }
 
 // Daily price limit as a fraction. Live quotes provide exact limit prices; this table is used for mock data and backtests.
@@ -82,23 +82,23 @@ export function calculateFees(side: Side, amount: number): TradeFees {
 
 // Lot-size rules. Returns an error message, or null when the quantity is valid.
 export function validateQuantity(symbol: string, side: Side, quantity: number, sellableQuantity: number): string | null {
-  if (!Number.isInteger(quantity) || quantity <= 0) return "Quantity must be a positive whole number of shares.";
+  if (!Number.isInteger(quantity) || quantity <= 0) return "数量必须是正整数股。";
 
   const board = boardOf(symbol);
 
   if (side === "buy") {
-    if (board === "star") return quantity >= 200 ? null : "STAR Market buys need at least 200 shares.";
-    if (board === "bse") return quantity >= 100 ? null : "Beijing SE buys need at least 100 shares.";
-    return quantity % 100 === 0 ? null : "Buys must be in lots of 100 shares.";
+    if (board === "star") return quantity >= 200 ? null : "科创板买入至少 200 股。";
+    if (board === "bse") return quantity >= 100 ? null : "北交所买入至少 100 股。";
+    return quantity % 100 === 0 ? null : "买入数量必须是 100 股的整数倍。";
   }
 
   if (quantity > sellableQuantity) {
-    return `Only ${sellableQuantity} shares are sellable today (T+1: shares bought today can be sold from the next trading day).`;
+    return `今天可卖数量只有 ${sellableQuantity} 股（T+1：当天买入的股票下一个交易日才能卖出）。`;
   }
   if (quantity === sellableQuantity) return null; // odd lots must be sold all at once, which this is
-  if (board === "star") return quantity >= 200 ? null : "STAR Market sells need at least 200 shares unless you sell the whole position.";
-  if (board === "bse") return quantity >= 100 ? null : "Beijing SE sells need at least 100 shares unless you sell the whole position.";
-  return quantity % 100 === 0 ? null : "Sells must be in lots of 100 shares unless you sell the whole position.";
+  if (board === "star") return quantity >= 200 ? null : "科创板卖出至少 200 股，除非一次卖出全部持仓。";
+  if (board === "bse") return quantity >= 100 ? null : "北交所卖出至少 100 股，除非一次卖出全部持仓。";
+  return quantity % 100 === 0 ? null : "卖出数量必须是 100 股的整数倍，除非一次卖出全部持仓。";
 }
 
 export function minBuyLot(symbol: string) {

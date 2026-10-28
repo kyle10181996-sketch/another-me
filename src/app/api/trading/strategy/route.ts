@@ -21,7 +21,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ state, ...result });
     }
 
-    return NextResponse.json({ error: "Unknown action." }, { status: 400 });
+    return NextResponse.json({ error: "未知操作。" }, { status: 400 });
   } catch (error) {
     return tradingErrorResponse(error);
   }

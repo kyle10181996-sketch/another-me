@@ -41,7 +41,7 @@ export function parseJournal(value: unknown): TradeJournal {
 
 function requireSymbol(input: unknown) {
   const symbol = typeof input === "string" ? normalizeSymbol(input) : null;
-  if (!symbol) throw new TradingRuleError("BAD_SYMBOL", "Enter a 6-digit A-share code, e.g. 600519 or 000001.");
+  if (!symbol) throw new TradingRuleError("BAD_SYMBOL", "请输入 6 位 A 股代码，例如 600519 或 000001。");
   return symbol;
 }
 
@@ -96,7 +96,7 @@ export async function aiReviewTrade(tradeId: string) {
   const snapshot = await readTradingState();
   const trade = snapshot.trades.find((item) => item.id === tradeId);
   const localReview = snapshot.reviews.find((item) => item.tradeId === tradeId);
-  if (!trade || !localReview) throw new TradingRuleError("NOT_FOUND", "Trade not found.");
+  if (!trade || !localReview) throw new TradingRuleError("NOT_FOUND", "找不到这笔交易。");
 
   const roundTrips = buildRoundTrips(snapshot.trades, trade.accountId);
   const closing = roundTrips.filter((trip) => trip.exitTradeId === trade.id);
@@ -185,7 +185,7 @@ export async function distillAndBacktest(): Promise<{ result: DistillResult; sta
 
 export async function setStrategyStatus(strategyId: string, status: "active" | "retired") {
   return updateTradingState(async (state) => {
-    if (!state.strategies.some((item) => item.id === strategyId)) throw new TradingRuleError("NOT_FOUND", "Strategy not found.");
+    if (!state.strategies.some((item) => item.id === strategyId)) throw new TradingRuleError("NOT_FOUND", "找不到这个策略。");
     const now = new Date().toISOString();
     const strategies = state.strategies.map((item) => {
       if (item.id === strategyId) return { ...item, status, updatedAt: now };
@@ -200,7 +200,7 @@ export async function setStrategyStatus(strategyId: string, status: "active" | "
 export async function runActiveStrategy() {
   return updateTradingState(async (state) => {
     const strategy = state.strategies.find((item) => item.status === "active");
-    if (!strategy) throw new TradingRuleError("NO_ACTIVE_STRATEGY", "Activate a distilled strategy first.");
+    if (!strategy) throw new TradingRuleError("NO_ACTIVE_STRATEGY", "请先启用一个蒸馏出的策略。");
 
     const now = new Date();
     const account = state.accounts.find((item) => item.id === STRATEGY_ACCOUNT_ID)!;
@@ -304,14 +304,14 @@ export async function analyzePortfolio(questionInput: unknown) {
     analysis = {
       ...base,
       provider: "local",
-      headline: "Your safety matters more than any trade.",
+      headline: "你的安全比任何一笔交易都重要。",
       answer: safetyNote ?? "",
       working: [],
       costing: [],
       emotionalPatterns: [],
       openPositionNotes: [],
       rules: [],
-      uncertaintyNote: "Trading analysis is paused for this message.",
+      uncertaintyNote: "这条消息暂停交易分析。",
     };
   } else if (await hasConfiguredApiKey()) {
     try {
@@ -329,13 +329,13 @@ export async function analyzePortfolio(questionInput: unknown) {
         emotionalPatterns: strings(ai.emotionalPatterns),
         openPositionNotes: strings(ai.openPositionNotes),
         rules: strings(ai.rules, 6),
-        uncertaintyNote: typeof ai.uncertaintyNote === "string" && ai.uncertaintyNote ? ai.uncertaintyNote : "AI analysis of simulated trades; it does not predict prices.",
+        uncertaintyNote: typeof ai.uncertaintyNote === "string" && ai.uncertaintyNote ? ai.uncertaintyNote : "这是对模拟交易的 AI 分析，不预测股价。",
       };
     } catch {
-      analysis = { ...base, provider: "local", ...analyzeLocally(packet), answer: question ? "The AI provider could not be reached, so this is the rule-based summary." : "" };
+      analysis = { ...base, provider: "local", ...analyzeLocally(packet), answer: question ? "暂时连不上 AI 提供方，以下是规则化总结。" : "" };
     }
   } else {
-    analysis = { ...base, provider: "local", ...analyzeLocally(packet), answer: question ? "Answering free-form questions needs an AI provider (API Settings). Here is the rule-based summary." : "" };
+    analysis = { ...base, provider: "local", ...analyzeLocally(packet), answer: question ? "回答自由提问需要先配置 AI 提供方（API Settings）。以下是规则化总结。" : "" };
   }
 
   await updateTradingState(async (state) => ({ state: { ...state, analyses: [analysis, ...state.analyses].slice(0, 20) }, result: null }));

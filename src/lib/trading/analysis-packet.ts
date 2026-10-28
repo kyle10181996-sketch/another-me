@@ -3,6 +3,7 @@
 import { tradingDisclaimer } from "@/lib/safety/classify-risk";
 import { buildRoundTrips, computeStats, groupStats } from "@/lib/trading/analytics";
 import { aggregateByEntry, MIN_ROUND_TRIPS } from "@/lib/trading/distiller";
+import { emotionLabel } from "@/lib/trading/labels";
 import { daysBetween } from "@/lib/trading/rules";
 import { earliestLotDate, valueAccount } from "@/lib/trading/engine";
 import { flagDescriptions, positiveFlags } from "@/lib/trading/trade-reviewer";
@@ -32,12 +33,12 @@ export function buildAnalysisPacket(state: TradingState, prices: Record<string, 
       today,
       dataSource: state.settings.dataSource,
       disclaimer: tradingDisclaimer,
-      distillationProgress: `${manualTrips.length}/${MIN_ROUND_TRIPS} closed trades`,
+      distillationProgress: `已平仓 ${manualTrips.length}/${MIN_ROUND_TRIPS} 笔`,
     },
     accounts: state.accounts.map((account) => {
       const view = valueAccount(account, prices, today);
       return {
-        name: account.name,
+        name: account.kind === "manual" ? "我的账户" : "策略账户",
         kind: account.kind,
         initialCash: account.initialCash,
         cash: account.cash,
@@ -138,59 +139,59 @@ export function buildAnalysisPacket(state: TradingState, prices: Record<string, 
 export type AnalysisPacket = ReturnType<typeof buildAnalysisPacket>;
 
 const featureGlossary =
-  "marketAtEntry/marketAtTrade fields: changePctToday (% change that day), gapPct (open vs prev close), ma5DistPct/ma20DistPct (% above/below 5/20-day average), momentum5dPct/momentum20dPct, volumeRatio5d (volume vs 5-day avg), distToLimitUpPct (room to the daily limit-up), rangePosition20d (0 = 20-day low, 1 = 20-day high), positionPctOfEquity (order size as % of account).";
+  "JSON 中 marketAtEntry / marketAtTrade 字段说明：changePctToday 当日涨跌幅 %，gapPct 开盘跳空 %，ma5DistPct / ma20DistPct 偏离 5 日 / 20 日均线 %，momentum5dPct / momentum20dPct 5 日 / 20 日涨跌幅 %，volumeRatio5d 量比（对 5 日均量），distToLimitUpPct 距涨停 %，rangePosition20d 20 日区间位置（0 = 20 日最低，1 = 20 日最高），positionPctOfEquity 这笔订单占总资产 %。emotion 取值：calm 冷静、confident 自信、unsure 犹豫、fomo 怕错过、greedy 贪婪、fear 恐惧、revenge 想报复/回本、bored 无聊。";
 
 // Markdown version meant to be pasted into a chat with Claude.
 export function packetToMarkdown(packet: AnalysisPacket) {
   const manual = packet.accounts.find((account) => account.kind === "manual");
   const perf = packet.performance.myClosedTrades;
   const lines = [
-    "# My A-share simulator trading log",
+    "# 我的 A 股模拟交易记录",
     "",
-    "I paper-trade A-shares in a simulator (virtual money, real A-share rules: T+1, lots of 100, price limits, fees) and journal every order with my reason and emotion. My goal is to find which of my habits make money, drop the emotional ones, and later turn the profitable pattern into fixed rules.",
+    "我在模拟器里用虚拟资金交易 A 股（按真实规则：T+1、100 股一手、涨跌停、手续费），每笔下单都记录了理由和当时的情绪。我的目标是找出哪些习惯能赚钱、去掉情绪化的交易，之后把盈利的模式固定成规则。",
     "",
-    "Please analyze this log as a trading-process coach:",
-    "1. What is working: which setups, conditions or behaviors line up with my winners?",
-    "2. What is costing me money: recurring mistakes, emotional patterns, sizing, exits.",
-    "3. Risks in my current open positions (process-wise, e.g. no stop, oversized, held past plan).",
-    "4. 3 concrete rules I should follow for the next 20 trades, and how to tell if they work.",
-    "5. How much of this is likely noise given the sample size.",
+    "请你以交易过程教练的身份，用中文分析这份记录：",
+    "1. 哪些做法有效：我的盈利单在哪些买点、市场条件或行为上有共同点？",
+    "2. 哪些地方在亏钱：反复出现的错误、情绪模式、仓位、离场方式。",
+    "3. 当前持仓在交易过程上的风险（例如没设止损、仓位过重、超过计划持有时间）。",
+    "4. 接下来 20 笔交易我应该遵守的 3 条具体规则，以及怎么判断它们是否有效。",
+    "5. 考虑到样本量，这些结论有多少可能只是噪音。",
     "",
-    "Do not predict prices or tell me to buy or sell specific stocks; judge my process.",
+    "不要预测股价，也不要让我买卖某只具体的股票；请评价我的交易过程。",
     "",
-    "## Snapshot",
-    `- Date: ${packet.meta.today} · data source: ${packet.meta.dataSource}`,
-    manual ? `- My account: equity ¥${manual.equity.toFixed(0)} (${manual.totalReturnPct}% since start), cash ¥${manual.cash.toFixed(0)}, ${manual.positions.length} open positions` : "",
-    `- Closed trades: ${perf.count} · win rate ${perf.winRate}% · avg return ${perf.avgReturnPct}% · avg win ${perf.avgWinPct}% / avg loss ${perf.avgLossPct}% · profit factor ${perf.profitFactor} · avg hold ${perf.avgHoldDays} days · max drawdown ${perf.maxDrawdownPct}%`,
-    packet.avgProcessScore !== null ? `- Average process score from trade reviews: ${packet.avgProcessScore}/100` : "",
-    `- Strategy distillation progress: ${packet.meta.distillationProgress}`,
+    "## 概况",
+    `- 日期：${packet.meta.today} · 数据源：${packet.meta.dataSource === "mock" ? "模拟行情" : "腾讯实时行情"}`,
+    manual ? `- 我的账户：总资产 ¥${manual.equity.toFixed(0)}（累计 ${manual.totalReturnPct}%），现金 ¥${manual.cash.toFixed(0)}，持仓 ${manual.positions.length} 只` : "",
+    `- 已平仓 ${perf.count} 笔 · 胜率 ${perf.winRate}% · 平均收益 ${perf.avgReturnPct}% · 平均盈利 ${perf.avgWinPct}% / 平均亏损 ${perf.avgLossPct}% · 盈亏比因子 ${perf.profitFactor} · 平均持有 ${perf.avgHoldDays} 天 · 最大回撤 ${perf.maxDrawdownPct}%`,
+    packet.avgProcessScore !== null ? `- 逐笔复盘的平均过程分：${packet.avgProcessScore}/100` : "",
+    `- 策略蒸馏进度：${packet.meta.distillationProgress}`,
     "",
   ];
 
   if (packet.resultsByEntryEmotion.length) {
-    lines.push("## Results by emotion at entry", "| Emotion | Trades | Win rate | Avg return |", "|---|---|---|---|");
-    for (const row of packet.resultsByEntryEmotion) lines.push(`| ${row.emotion} | ${row.trades} | ${row.winRate}% | ${row.avgReturnPct}% |`);
+    lines.push("## 按买入时情绪统计", "| 情绪 | 笔数 | 胜率 | 平均收益 |", "|---|---|---|---|");
+    for (const row of packet.resultsByEntryEmotion) lines.push(`| ${emotionLabel(row.emotion)} | ${row.trades} | ${row.winRate}% | ${row.avgReturnPct}% |`);
     lines.push("");
   }
 
   if (packet.recurringProcessIssues.length) {
-    lines.push("## Recurring issues flagged by the rule-based reviewer");
+    lines.push("## 复盘反复标记的问题");
     for (const issue of packet.recurringProcessIssues) lines.push(`- ${issue.description} ×${issue.count}`);
     lines.push("");
   }
 
   if (packet.recurringGoodHabits.length) {
-    lines.push("## Good habits flagged by the reviewer");
+    lines.push("## 复盘标记的好习惯");
     for (const habit of packet.recurringGoodHabits) lines.push(`- ${habit.description} ×${habit.count}`);
     lines.push("");
   }
 
   if (manual?.positions.length) {
-    lines.push("## Open positions", "| Stock | Qty | Weight | P&L | Held |", "|---|---|---|---|---|");
-    for (const position of manual.positions) lines.push(`| ${position.name} ${position.symbol} | ${position.quantity} | ${position.weightPct}% | ${position.pnlPct}% | ${position.heldDays}d |`);
+    lines.push("## 当前持仓", "| 股票 | 数量 | 仓位占比 | 浮动盈亏 | 已持有 |", "|---|---|---|---|---|");
+    for (const position of manual.positions) lines.push(`| ${position.name} ${position.symbol} | ${position.quantity} | ${position.weightPct}% | ${position.pnlPct}% | ${position.heldDays} 天 |`);
     lines.push("");
   }
 
-  lines.push("## Full data (JSON)", featureGlossary, "", "```json", JSON.stringify(packet, null, 1), "```");
+  lines.push("## 完整数据（JSON）", featureGlossary, "", "```json", JSON.stringify(packet, null, 1), "```");
   return lines.filter((line, index, all) => line !== "" || all[index - 1] !== "").join("\n");
 }

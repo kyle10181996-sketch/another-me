@@ -13,15 +13,15 @@ export type DaySnapshot = {
 };
 
 export const marketFeatureLabels: Record<MarketFeatureKey, string> = {
-  changePctToday: "Change today (%)",
-  gapPct: "Opening gap (%)",
-  ma5DistPct: "Distance from 5-day MA (%)",
-  ma20DistPct: "Distance from 20-day MA (%)",
-  momentum5dPct: "5-day momentum (%)",
-  momentum20dPct: "20-day momentum (%)",
-  volumeRatio5d: "Volume vs. 5-day average (x)",
-  distToLimitUpPct: "Room to limit-up (%)",
-  rangePosition20d: "Position in 20-day range (0-1)",
+  changePctToday: "当日涨跌幅 (%)",
+  gapPct: "开盘跳空 (%)",
+  ma5DistPct: "偏离 5 日均线 (%)",
+  ma20DistPct: "偏离 20 日均线 (%)",
+  momentum5dPct: "5 日涨跌幅 (%)",
+  momentum20dPct: "20 日涨跌幅 (%)",
+  volumeRatio5d: "量比（对 5 日均量，倍）",
+  distToLimitUpPct: "距涨停 (%)",
+  rangePosition20d: "20 日区间位置（0 低 - 1 高）",
 };
 
 export const marketFeatureKeys = Object.keys(marketFeatureLabels) as MarketFeatureKey[];

@@ -236,10 +236,10 @@ export function AppShell() {
           <Link
             href="/trading"
             className="inline-flex min-h-10 items-center gap-2 rounded-md border border-[var(--line)] bg-white/55 px-3 py-2 text-sm font-medium text-[var(--ink)] transition hover:bg-white/80"
-            title="A-Share Simulator"
+            title="A 股模拟交易"
           >
             <CandlestickChart size={17} />
-            <span>A-Share Sim</span>
+            <span>A 股模拟</span>
           </Link>
         </div>
       </header>
