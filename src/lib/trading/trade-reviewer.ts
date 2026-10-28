@@ -23,6 +23,9 @@ export const flagDescriptions: Record<string, string> = {
   PLAN_COMPLETE: "Entered with stop and target defined",
 };
 
+// Flags that mark good habits; every other flag is an issue.
+export const positiveFlags = new Set(["STOP_RESPECTED", "TARGET_HIT", "PLAN_COMPLETE"]);
+
 export type ReviewContext = {
   roundTrips: RoundTrip[]; // round trips closed by this trade (sells only)
   tradesToday: number;

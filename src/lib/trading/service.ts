@@ -1,5 +1,8 @@
 // Server-side use cases for the trading simulator. API routes stay thin and call these.
-import { strategyExplainPrompt, tradeReviewPrompt } from "@/lib/ai/prompts";
+import { strategyExplainPrompt, tradeReviewPrompt, tradingCoachPrompt } from "@/lib/ai/prompts";
+import { classifyTradingRisk, getTradingSafetyNote } from "@/lib/safety/classify-risk";
+import { buildAnalysisPacket } from "@/lib/trading/analysis-packet";
+import { analyzeLocally } from "@/lib/trading/coach-local";
 import { generateJson, hasConfiguredApiKey } from "@/lib/ai/openai-responses";
 import { buildRoundTrips, computeStats } from "@/lib/trading/analytics";
 import { backtestStrategy } from "@/lib/trading/backtest";
@@ -11,7 +14,7 @@ import { normalizeSymbol, shanghaiDate, TradingRuleError } from "@/lib/trading/r
 import { STRATEGY_ACCOUNT_ID, runStrategyCycle } from "@/lib/trading/strategy-runner";
 import { readTradingState, updateTradingState } from "@/lib/trading/store";
 import { reviewTradeLocally } from "@/lib/trading/trade-reviewer";
-import type { Bar, Quote, Side, TradeEmotion, TradeJournal, TradeReview, TradingSettings, TradingState } from "@/lib/trading/types";
+import type { Bar, CoachAnalysis, Quote, Side, TradeEmotion, TradeJournal, TradeReview, TradingSettings, TradingState } from "@/lib/trading/types";
 
 export const MANUAL_ACCOUNT_ID = "acct_manual";
 
@@ -251,10 +254,90 @@ export async function resetAccounts(initialCash: unknown) {
         trades: [],
         reviews: [],
         strategyLog: [],
+        analyses: [],
         strategies: state.strategies.map((item) => (item.status === "active" ? { ...item, status: "retired" as const } : item)),
         settings: { ...state.settings, initialCash: startCash },
       },
       result: null,
     };
   });
+}
+
+// Snapshot of the user's trading, priced with current quotes when available.
+export async function getAnalysisPacket() {
+  const state = await readTradingState();
+  const now = new Date();
+  const held = [...new Set(state.accounts.flatMap((account) => account.positions.map((position) => position.symbol)))];
+  let prices: Record<string, number> = {};
+  try {
+    const quotes = held.length ? await getQuotes(held, state.settings.dataSource, now) : [];
+    prices = Object.fromEntries(quotes.map((quote) => [quote.symbol, quote.price]));
+  } catch {
+    // Fall back to cost prices; the packet is still useful.
+  }
+  return buildAnalysisPacket(state, prices, shanghaiDate(now));
+}
+
+type AiCoach = Pick<CoachAnalysis, "headline" | "answer" | "working" | "costing" | "emotionalPatterns" | "openPositionNotes" | "rules" | "uncertaintyNote">;
+
+function strings(value: unknown, limit = 8) {
+  return Array.isArray(value) ? value.map(String).filter(Boolean).slice(0, limit) : [];
+}
+
+export async function analyzePortfolio(questionInput: unknown) {
+  const question = typeof questionInput === "string" ? questionInput.trim().slice(0, 1000) : "";
+  const risk = classifyTradingRisk(question);
+  const safetyNote = getTradingSafetyNote(risk) ?? undefined;
+  const packet = await getAnalysisPacket();
+  const base = {
+    id: `coach_${crypto.randomUUID()}`,
+    userId: (await readTradingState()).userId,
+    question,
+    safetyNote,
+    basedOnClosedTrades: packet.performance.myClosedTrades.count,
+    createdAt: new Date().toISOString(),
+  };
+
+  let analysis: CoachAnalysis;
+
+  if (risk === "crisis") {
+    analysis = {
+      ...base,
+      provider: "local",
+      headline: "Your safety matters more than any trade.",
+      answer: safetyNote ?? "",
+      working: [],
+      costing: [],
+      emotionalPatterns: [],
+      openPositionNotes: [],
+      rules: [],
+      uncertaintyNote: "Trading analysis is paused for this message.",
+    };
+  } else if (await hasConfiguredApiKey()) {
+    try {
+      const ai = await generateJson<AiCoach>({
+        instructions: tradingCoachPrompt,
+        input: JSON.stringify({ question: question || null, snapshot: packet }),
+      });
+      analysis = {
+        ...base,
+        provider: "ai",
+        headline: typeof ai.headline === "string" ? ai.headline : "",
+        answer: typeof ai.answer === "string" ? ai.answer : "",
+        working: strings(ai.working),
+        costing: strings(ai.costing),
+        emotionalPatterns: strings(ai.emotionalPatterns),
+        openPositionNotes: strings(ai.openPositionNotes),
+        rules: strings(ai.rules, 6),
+        uncertaintyNote: typeof ai.uncertaintyNote === "string" && ai.uncertaintyNote ? ai.uncertaintyNote : "AI analysis of simulated trades; it does not predict prices.",
+      };
+    } catch {
+      analysis = { ...base, provider: "local", ...analyzeLocally(packet), answer: question ? "The AI provider could not be reached, so this is the rule-based summary." : "" };
+    }
+  } else {
+    analysis = { ...base, provider: "local", ...analyzeLocally(packet), answer: question ? "Answering free-form questions needs an AI provider (API Settings). Here is the rule-based summary." : "" };
+  }
+
+  await updateTradingState(async (state) => ({ state: { ...state, analyses: [analysis, ...state.analyses].slice(0, 20) }, result: null }));
+  return analysis;
 }

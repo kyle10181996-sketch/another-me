@@ -1,23 +1,25 @@
 "use client";
 
-import { ArrowLeft, BarChart3, Bot, CandlestickChart, NotebookPen, Settings, Wallet } from "lucide-react";
+import { ArrowLeft, BarChart3, Bot, CandlestickChart, MessageSquareText, NotebookPen, Settings, Wallet } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { tradingDisclaimer } from "@/lib/safety/classify-risk";
 import { valueAccount } from "@/lib/trading/engine";
 import { isWithinTradingSession, shanghaiDate } from "@/lib/trading/rules";
 import type { Quote, TradingState } from "@/lib/trading/types";
+import { CoachPanel } from "@/components/trading/CoachPanel";
 import { InsightsPanel, SettingsPanel, StrategyPanel } from "@/components/trading/StrategyPanels";
 import { JournalPanel, PortfolioPanel, TradePanel } from "@/components/trading/TradePanels";
 import { api, Notice, signClass, signed, money } from "@/components/trading/ui";
 
-type Tab = "trade" | "portfolio" | "journal" | "insights" | "strategy" | "settings";
+type Tab = "trade" | "portfolio" | "journal" | "insights" | "coach" | "strategy" | "settings";
 
 const tabs: { id: Tab; label: string; icon: typeof Wallet }[] = [
   { id: "trade", label: "Trade", icon: CandlestickChart },
   { id: "portfolio", label: "Portfolio", icon: Wallet },
   { id: "journal", label: "Journal", icon: NotebookPen },
   { id: "insights", label: "Insights", icon: BarChart3 },
+  { id: "coach", label: "Coach", icon: MessageSquareText },
   { id: "strategy", label: "Strategy", icon: Bot },
   { id: "settings", label: "Settings", icon: Settings },
 ];
@@ -165,6 +167,7 @@ export function TradingApp() {
         {tab === "portfolio" && <PortfolioPanel views={views} onPick={(symbol) => { setSelected(symbol); setTab("trade"); }} />}
         {tab === "journal" && <JournalPanel state={state} onState={setState} hasApiKey={hasApiKey} />}
         {tab === "insights" && <InsightsPanel state={state} manual={manual} strategy={strategyView} />}
+        {tab === "coach" && <CoachPanel state={state} onState={setState} hasApiKey={hasApiKey} />}
         {tab === "strategy" && <StrategyPanel state={state} onState={setState} autoRun={autoRun} onAutoRun={setAutoRun} />}
         {tab === "settings" && <SettingsPanel state={state} onState={setState} />}
       </div>

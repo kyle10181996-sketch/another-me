@@ -57,3 +57,19 @@ AI 提示词集中在 `src/lib/ai/prompts.ts`（`tradeReviewPrompt`、`strategyE
 - 只在模拟账户里交易，不接券商、不动真实资金。
 - 样本内统计偏乐观；几十笔交易得出的模式可能只是运气。所有输出都附带不确定性说明。
 - 交易日志里出现借钱、加杠杆、梭哈、回本等字样时，复盘会附带安全提示（`classifyTradingRisk`）。
+
+## 分析接口（Coach）
+
+模拟器页面的 `Coach` 标签提供两种分析方式：
+
+1. **Copy for Claude**：把全部模拟交易整理成一份 Markdown（概况、按情绪统计、反复出现的问题和好习惯、持仓、每笔已平仓交易的理由与入场时的市场特征，以及完整 JSON），并附带分析要求。复制后直接粘贴到任意 Claude 对话即可。也可下载为 `.md` 文件。
+2. **Analyze my trading**：在应用内实时分析整个账户，可附带具体问题。配置了 AI 提供方时调用 AI（提示词为 `tradingCoachPrompt`），否则返回规则化总结。最近 20 次分析保存在 `analyses` 中。
+
+接口：
+
+- `GET /api/trading/export?format=md|json`：分析数据包（`src/lib/trading/analysis-packet.ts`）
+- `POST /api/trading/analyze { question? }`：整体分析（`analyzePortfolio`，问题文本先经过 `classifyTradingRisk`）
+
+### 用 Claude 作为 AI 提供方
+
+在首页 `API Settings` 选择 `Claude` 预设（Base URL `https://api.anthropic.com`，模型 `claude-opus-5-5`），填入 Anthropic API Key。Base URL 指向 `api.anthropic.com` 时，所有 AI 调用（逐笔复盘、策略解读、整体分析、原有的记忆和信件功能）都会通过官方 `@anthropic-ai/sdk` 发送（`src/lib/ai/claude.ts`），并开启服务端拒答回退；其他 Base URL 仍走 OpenAI 兼容接口。API Key 只保存在本机，只在服务端使用。

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { buildRoundTrips, computeStats, groupStats } from "@/lib/trading/analytics";
 import { aggregateByEntry, MIN_ROUND_TRIPS, type DistillResult } from "@/lib/trading/distiller";
 import type { AccountView } from "@/lib/trading/engine";
-import { flagDescriptions } from "@/lib/trading/trade-reviewer";
+import { flagDescriptions, positiveFlags } from "@/lib/trading/trade-reviewer";
 import type { DistilledStrategy, PerformanceStats, StrategyLogEntry, Trade, TradingState } from "@/lib/trading/types";
 import { api, Button, Card, Empty, money, Notice, signClass, signed, Stat } from "@/components/trading/ui";
 
@@ -32,7 +32,7 @@ export function InsightsPanel({ state, manual, strategy }: { state: TradingState
   const avgScore = manualReviews.length ? Math.round(manualReviews.reduce((sum, review) => sum + review.score, 0) / manualReviews.length) : 0;
   const flagCounts = new Map<string, number>();
   for (const review of manualReviews) for (const flag of review.flags) flagCounts.set(flag, (flagCounts.get(flag) ?? 0) + 1);
-  const topFlags = [...flagCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
+  const topFlags = [...flagCounts.entries()].filter(([flag]) => !positiveFlags.has(flag)).sort((a, b) => b[1] - a[1]).slice(0, 8);
   const progress = Math.min(100, Math.round((trips.length / MIN_ROUND_TRIPS) * 100));
 
   return (

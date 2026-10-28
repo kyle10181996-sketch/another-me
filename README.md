@@ -40,7 +40,7 @@ When you open the app for the first time, go to `API Settings` and enter your mo
 
 ## AI Provider Configuration
 
-AnotherMe uses the OpenAI-compatible `/chat/completions` API format. Any provider with a compatible endpoint can be used by entering:
+AnotherMe supports Claude through the official Anthropic SDK (pick the `Claude` preset and paste an Anthropic API key), and any provider with an OpenAI-compatible `/chat/completions` endpoint by entering:
 
 ```text
 Base URL
@@ -52,6 +52,7 @@ Common examples:
 
 | Provider | Base URL | Example model |
 | --- | --- | --- |
+| Claude (Anthropic) | `https://api.anthropic.com` | `claude-opus-5-5` |
 | OpenAI | `https://api.openai.com/v1` | `gpt-4.1-mini` |
 | DeepSeek | `https://api.deepseek.com/v1` | `deepseek-chat` |
 | Qwen | `https://dashscope.aliyuncs.com/compatible-mode/v1` | `qwen-plus` |

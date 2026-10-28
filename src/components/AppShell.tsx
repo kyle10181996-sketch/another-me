@@ -543,6 +543,7 @@ function SettingsPanel({
   const [baseUrl, setBaseUrl] = useState(settings.baseUrl);
   const [model, setModel] = useState(settings.model);
   const presets = [
+    { label: "Claude", baseUrl: "https://api.anthropic.com", model: "claude-opus-5-5" },
     { label: "OpenAI", baseUrl: "https://api.openai.com/v1", model: "gpt-4.1-mini" },
     { label: "DeepSeek", baseUrl: "https://api.deepseek.com/v1", model: "deepseek-chat" },
     { label: "Qwen", baseUrl: "https://dashscope.aliyuncs.com/compatible-mode/v1", model: "qwen-plus" },
@@ -555,7 +556,7 @@ function SettingsPanel({
         <KeyRound className="text-[var(--accent)]" />
         <div>
           <h2 className="text-2xl font-semibold">API Settings</h2>
-          <p className="text-sm text-[var(--muted)]">Use any OpenAI-compatible API. Base URL, model, and API key stay on this device.</p>
+          <p className="text-sm text-[var(--muted)]">Use Claude (Anthropic API) or any OpenAI-compatible API. Base URL, model, and API key stay on this device.</p>
         </div>
       </div>
       <div className="mb-3 flex flex-wrap gap-2">
@@ -603,7 +604,7 @@ function SettingsPanel({
         </span>
       </div>
       <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
-        Examples: DeepSeek uses `https://api.deepseek.com/v1`, Qwen uses `https://dashscope.aliyuncs.com/compatible-mode/v1`, and Kimi uses `https://api.moonshot.cn/v1`.
+        Claude uses `https://api.anthropic.com` with an Anthropic API key (sk-ant-...). DeepSeek uses `https://api.deepseek.com/v1`, Qwen uses `https://dashscope.aliyuncs.com/compatible-mode/v1`, and Kimi uses `https://api.moonshot.cn/v1`.
       </p>
     </section>
   );

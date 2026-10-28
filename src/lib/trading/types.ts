@@ -242,6 +242,24 @@ export type TradingSettings = {
   initialCash: number;
 };
 
+export type CoachAnalysis = {
+  id: string;
+  userId: string;
+  provider: "local" | "ai";
+  question: string;
+  headline: string;
+  answer: string;
+  working: string[];
+  costing: string[];
+  emotionalPatterns: string[];
+  openPositionNotes: string[];
+  rules: string[];
+  safetyNote?: string;
+  uncertaintyNote: string;
+  basedOnClosedTrades: number;
+  createdAt: string;
+};
+
 export type TradingState = {
   userId: string;
   accounts: TradingAccount[];
@@ -249,6 +267,7 @@ export type TradingState = {
   reviews: TradeReview[];
   strategies: DistilledStrategy[];
   strategyLog: StrategyLogEntry[];
+  analyses: CoachAnalysis[];
   watchlist: string[];
   settings: TradingSettings;
 };

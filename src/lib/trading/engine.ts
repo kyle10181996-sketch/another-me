@@ -43,6 +43,7 @@ export function createInitialTradingState(userId: string, initialCash = DEFAULT_
     reviews: [],
     strategies: [],
     strategyLog: [],
+    analyses: [],
     watchlist: ["sh600519", "sz000001", "sz300750", "sh601318", "sz002594"],
     settings: {
       dataSource: "tencent",

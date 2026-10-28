@@ -1,9 +1,18 @@
+import { generateClaudeText } from "@/lib/ai/claude";
 import { readLocalSettings } from "@/lib/local-file-store";
 
 type GenerateJsonOptions = {
   instructions: string;
   input: string;
 };
+
+export function isClaudeBaseUrl(baseUrl: string) {
+  try {
+    return new URL(baseUrl).hostname === "api.anthropic.com";
+  } catch {
+    return false;
+  }
+}
 
 export async function hasConfiguredApiKey() {
   const settings = await readLocalSettings();
@@ -15,6 +24,18 @@ export async function generateJson<T>(options: GenerateJsonOptions): Promise<T> 
 
   if (!settings.apiKey) {
     throw new Error("NO_API_KEY");
+  }
+
+  const jsonInstruction = "Return only one valid JSON object. Do not use Markdown code fences. Do not add explanatory text outside the JSON.";
+
+  if (isClaudeBaseUrl(settings.baseUrl)) {
+    const text = await generateClaudeText({
+      apiKey: settings.apiKey,
+      model: settings.model,
+      system: `${options.instructions}\n\n${jsonInstruction}`,
+      input: options.input,
+    });
+    return JSON.parse(extractJsonObject(text)) as T;
   }
 
   const endpoint = `${settings.baseUrl.replace(/\/+$/, "")}/chat/completions`;

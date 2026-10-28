@@ -21,6 +21,7 @@ function normalize(value: unknown): TradingState {
     reviews: Array.isArray(state.reviews) ? state.reviews : [],
     strategies: Array.isArray(state.strategies) ? state.strategies : [],
     strategyLog: Array.isArray(state.strategyLog) ? state.strategyLog : [],
+    analyses: Array.isArray(state.analyses) ? state.analyses : [],
     watchlist: Array.isArray(state.watchlist) ? state.watchlist : fallback.watchlist,
     settings: { ...fallback.settings, ...(state.settings ?? {}) },
   };
